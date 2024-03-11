@@ -32,7 +32,7 @@ func New(dbString string) (*Storage, error) {
 	return &Storage{db: db}, nil
 }
 
-func (s *Storage) GetAll(id string) error {
+func (s *Storage) GetAllStudents(id string) error {
 	const op = "storage.postgres.GetAll"
 
 	var student models.Student
