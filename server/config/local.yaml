@@ -1,4 +1,4 @@
-env: "local"
+env: "prod"
 db_string: "host=localhost user=gorm password=123 dbname=homekiller port=9920 sslmode=disable TimeZone=Asia/Russia"
 http_server:
   address: "localhost:3002"
