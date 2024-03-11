@@ -4,7 +4,6 @@ import (
 	"github.com/ilyakaznacheev/cleanenv"
 	"log"
 	"os"
-	"path"
 	"time"
 )
 
@@ -28,9 +27,9 @@ type DatabaseConfig struct {
 	Port     int    `yaml:"port"`
 }
 
-func MustLoad() *Config {
-	dir, _ := os.Getwd()
-	configPath := path.Join(dir, "config", "local.yaml")
+func MustLoad(configPath string) *Config {
+	//dir, _ := os.Getwd()
+	//configPath := path.Join(dir, "config", "local.yaml")
 
 	if configPath == "" {
 		log.Fatal("CONFIG_PATH is not set")
