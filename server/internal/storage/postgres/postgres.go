@@ -8,7 +8,7 @@ import (
 )
 
 type Storage struct {
-	db *gorm.DB
+	Db *gorm.DB
 }
 
 func New(dbString string) (*Storage, error) {
@@ -29,7 +29,7 @@ func New(dbString string) (*Storage, error) {
 		return nil, err
 	}
 
-	return &Storage{db: db}, nil
+	return &Storage{Db: db}, nil
 }
 
 func (s *Storage) GetAllStudents(id string) error {
@@ -38,7 +38,7 @@ func (s *Storage) GetAllStudents(id string) error {
 	var student models.Student
 	var _ []models.Student
 
-	_ = s.db.Table("students").First(&student)
+	_ = s.Db.Table("students").First(&student)
 
 	return nil
 }

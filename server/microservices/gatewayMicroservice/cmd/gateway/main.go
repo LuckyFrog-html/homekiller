@@ -1,13 +1,16 @@
-package gateway
+package main
 
 import (
-	"fmt"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/nats-io/nats.go"
+	"net/http"
 	"os"
 	"path"
 	"server/internal/config"
+	"server/internal/http_server/middlewares"
 	"server/internal/lib/logger/sl"
-	"time"
+	"server/microservices/gatewayMicroservice/routes/students/auth"
 )
 
 const (
@@ -25,27 +28,25 @@ func Start() {
 	log := sl.SetupLogger(cfg.Env)
 
 	conn, err := nats.Connect(nats.DefaultURL)
-
 	if err != nil {
 		log.Error(natsIsNotConnectedError)
 		return
 	}
 
 	defer conn.Drain()
-
-	_, err = conn.Subscribe("hello", func(msg *nats.Msg) {
-		fmt.Println("Тестим")
-		msg.Respond([]byte("Тестим х2"))
-	})
+	defer conn.Close()
 
 	if err != nil {
 		log.Error(err.Error())
 	}
-
-	req, err := conn.Request("hello", []byte("hi"), time.Second)
-	if err != nil {
-		log.Error(err.Error())
-	}
-	fmt.Println(string(req.Data))
 	log.Info("Gateway microservice is started")
+
+	router := chi.NewRouter()
+	router.Use(middleware.RequestID)
+	router.Use(middlewares.New(log))
+	router.Use(middleware.Recoverer)
+	router.Use(middleware.URLFormat) // Хз, надо ли оно нам
+
+	router.Post("/auth", auth.New(log, conn))
+	http.ListenAndServe(":8080", router)
 }

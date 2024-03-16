@@ -5,3 +5,9 @@
 docker pull nats
 docker run -p 4222:4222 -d -ti nats
 ```
+Далее для запуска необходимо в каком-то порядке выполнить следующее
+```bash
+go run server/microservices/gatewayMicroservice/cmd/gateway/main.go
+go run server/microservices/authMicroservice/cmd/main.go
+```
+Далее можно слать Post запросы на localhost:8080.
