@@ -23,7 +23,7 @@ func New(log *slog.Logger, natsConnection *nats.Conn) http.HandlerFunc {
 			return
 		}
 
-		msg, err := natsConnection.Request("AddNewStudent", data, time.Second*5)
+		msg, err := natsConnection.Request("AddNewStudent", data, time.Second*2)
 		if err != nil {
 			log.Error("Nats request broken", sl.Err(err))
 			return

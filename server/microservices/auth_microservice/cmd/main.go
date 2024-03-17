@@ -9,12 +9,17 @@ import (
 )
 
 func main() {
-	dir, _ := os.Getwd()
-	configPath := path.Join(dir, "config", "local.yaml")
+	var configPath string
+	if t := os.Getenv("config_path"); t != "" {
+		configPath = t
+	} else {
+		dir, _ := os.Getwd()
+		configPath = path.Join(dir, "config", "local.yaml")
+	}
 	cfg := config.MustLoad(configPath)
 	log := sl.SetupLogger(cfg.Env)
 
-	nc, err := nats.Connect(nats.DefaultURL)
+	nc, err := nats.Connect(cfg.NatsConf.Host)
 	if err != nil {
 		log.Error("Nats is not connected", sl.Err(err))
 	}

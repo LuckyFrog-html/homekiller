@@ -10,7 +10,7 @@ import (
 	"server/internal/config"
 	"server/internal/http_server/middlewares"
 	"server/internal/lib/logger/sl"
-	"server/microservices/gatewayMicroservice/routes/students/auth"
+	"server/microservices/gateway_microservice/routes/students/auth"
 )
 
 const (
@@ -27,7 +27,7 @@ func Start() {
 	cfg := config.MustLoad(configPath)
 	log := sl.SetupLogger(cfg.Env)
 
-	conn, err := nats.Connect(nats.DefaultURL)
+	conn, err := nats.Connect(cfg.NatsConf.Host)
 	if err != nil {
 		log.Error(natsIsNotConnectedError)
 		return
@@ -47,6 +47,6 @@ func Start() {
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat) // Хз, надо ли оно нам
 
-	router.Post("/auth", auth.New(log, conn))
+	router.Post("/auth*", auth.New(log, conn))
 	http.ListenAndServe(":8080", router)
 }
