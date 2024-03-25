@@ -16,9 +16,11 @@ type Student struct {
 
 type Teacher struct {
 	gorm.Model
-	Name    string
-	Subject []*Subject `gorm:"many2many:teacher_to_subjects;"`
-	Groups  []Group
+	Name     string
+	Login    string
+	Password string
+	Subjects []*Subject `gorm:"many2many:teacher_to_subjects;"`
+	Groups   []Group
 }
 
 type Group struct {
@@ -45,10 +47,10 @@ type Lesson struct {
 
 type Homework struct {
 	gorm.Model
-	description     string
+	Description     string
 	LessonID        uint
-	deadline        time.Time
-	MaxScore        string
+	Deadline        time.Time
+	MaxScore        int
 	HomeworkFiles   []HomeworkFile
 	HomeworkAnswers []HomeworkAnswer
 }
@@ -62,7 +64,7 @@ type HomeworkFile struct {
 type HomeworkAnswer struct {
 	gorm.Model
 	HomeworkID          uint
-	text                string
+	Text                string
 	HomeworkAnswerFiles []HomeworkAnswerFile
 	TeacherResume       []TeacherResume
 }
@@ -70,17 +72,18 @@ type HomeworkAnswer struct {
 type HomeworkAnswerFile struct {
 	gorm.Model
 	HomeworkAnswerID uint
-	filepath         string
+	Filepath         string
 }
 
 type TeacherResume struct {
 	gorm.Model
 	HomeworkAnswerID   uint
+	Comment            string
 	TeacherResumeFiles []TeacherResumeFile
 }
 
 type TeacherResumeFile struct {
 	gorm.Model
 	TeacherResumeID uint
-	filepath        string
+	Filepath        string
 }
