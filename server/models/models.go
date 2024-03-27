@@ -7,20 +7,23 @@ import (
 
 type Student struct {
 	gorm.Model
-	Name     string
-	Stage    int64
-	Login    string
-	Password string
-	Groups   []*Group `gorm:"many2many:students_to_groups;"`
+	Name             string
+	Stage            int64
+	Login            string
+	Password         string
+	Lessons          []*Lesson `gorm:"many2many:students_to_lessons;"`
+	HomeworksAnswers []*HomeworkAnswer
+	Groups           []*Group `gorm:"many2many:students_to_groups;"`
 }
 
 type Teacher struct {
 	gorm.Model
-	Name     string
-	Login    string
-	Password string
-	Subjects []*Subject `gorm:"many2many:teacher_to_subjects;"`
-	Groups   []Group
+	Name           string
+	Login          string
+	Password       string
+	TeacherResumes []*TeacherResume
+	Subjects       []*Subject `gorm:"many2many:teacher_to_subjects;"`
+	Groups         []*Group
 }
 
 type Group struct {
@@ -29,20 +32,27 @@ type Group struct {
 	IsActive  bool
 	TeacherID uint
 	Students  []*Student `gorm:"many2many:students_to_groups;"`
-	Lessons   []Lesson
+	Lessons   []*Lesson
 }
 
 type Subject struct {
 	gorm.Model
-	Title   string
-	Teacher []*Teacher `gorm:"many2many:teacher_to_subjects;"`
+	Title    string
+	Teachers []*Teacher `gorm:"many2many:teacher_to_subjects;"`
 }
 
 type Lesson struct {
 	gorm.Model
 	Date      time.Time
 	GroupID   uint
-	Homeworks []Homework
+	Homeworks []*Homework
+	Student   []*Student `gorm:"many2many:students_to_lessons;"`
+}
+
+type StudentsToGroups struct {
+	StudentID  uint
+	GroupID    uint
+	AppendDate time.Time
 }
 
 type Homework struct {
@@ -51,8 +61,8 @@ type Homework struct {
 	LessonID        uint
 	Deadline        time.Time
 	MaxScore        int
-	HomeworkFiles   []HomeworkFile
-	HomeworkAnswers []HomeworkAnswer
+	HomeworkFiles   []*HomeworkFile
+	HomeworkAnswers []*HomeworkAnswer
 }
 
 type HomeworkFile struct {
@@ -63,10 +73,11 @@ type HomeworkFile struct {
 
 type HomeworkAnswer struct {
 	gorm.Model
-	HomeworkID          uint
 	Text                string
-	HomeworkAnswerFiles []HomeworkAnswerFile
-	TeacherResume       []TeacherResume
+	HomeworkID          uint
+	StudentID           uint
+	HomeworkAnswerFiles []*HomeworkAnswerFile
+	TeacherResumes      []*TeacherResume
 }
 
 type HomeworkAnswerFile struct {
@@ -79,7 +90,9 @@ type TeacherResume struct {
 	gorm.Model
 	HomeworkAnswerID   uint
 	Comment            string
-	TeacherResumeFiles []TeacherResumeFile
+	Score              int
+	TeacherID          uint
+	TeacherResumeFiles []*TeacherResumeFile
 }
 
 type TeacherResumeFile struct {

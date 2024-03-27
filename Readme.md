@@ -10,4 +10,4 @@ docker run -p 4222:4222 -d -ti nats
 go run server/microservices/gatewayMicroservice/cmd/gateway/main.go
 go run server/microservices/auth_microservice/cmd/main.go
 ```
-Далее можно слать Post запросы на localhost:8080.
+Далее можно слать Post запросы на localhost:8080
