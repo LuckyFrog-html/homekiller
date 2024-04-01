@@ -11,3 +11,6 @@ go run server/microservices/gatewayMicroservice/cmd/gateway/main.go
 go run server/microservices/auth_microservice/cmd/main.go
 ```
 Далее можно слать Post запросы на localhost:8080.
+```bash
+docker-compose up -d
+```
