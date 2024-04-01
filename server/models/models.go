@@ -7,18 +7,23 @@ import (
 
 type Student struct {
 	gorm.Model
-	Name     string
-	Stage    int64
-	Login    string
-	Password string
-	Groups   []*Group `gorm:"many2many:students_to_groups;"`
+	Name             string
+	Stage            int64
+	Login            string
+	Password         string
+	Lessons          []*Lesson `gorm:"many2many:students_to_lessons;"`
+	HomeworksAnswers []*HomeworkAnswer
+	Groups           []*Group `gorm:"many2many:students_to_groups;"`
 }
 
 type Teacher struct {
 	gorm.Model
-	Name    string
-	Subject []*Subject `gorm:"many2many:teacher_to_subjects;"`
-	Groups  []Group
+	Name           string
+	Login          string
+	Password       string
+	TeacherResumes []*TeacherResume
+	Subjects       []*Subject `gorm:"many2many:teacher_to_subjects;"`
+	Groups         []*Group
 }
 
 type Group struct {
@@ -27,30 +32,37 @@ type Group struct {
 	IsActive  bool
 	TeacherID uint
 	Students  []*Student `gorm:"many2many:students_to_groups;"`
-	Lessons   []Lesson
+	Lessons   []*Lesson
 }
 
 type Subject struct {
 	gorm.Model
-	Title   string
-	Teacher []*Teacher `gorm:"many2many:teacher_to_subjects;"`
+	Title    string
+	Teachers []*Teacher `gorm:"many2many:teacher_to_subjects;"`
 }
 
 type Lesson struct {
 	gorm.Model
 	Date      time.Time
 	GroupID   uint
-	Homeworks []Homework
+	Homeworks []*Homework
+	Student   []*Student `gorm:"many2many:students_to_lessons;"`
+}
+
+type StudentsToGroups struct {
+	StudentID  uint
+	GroupID    uint
+	AppendDate time.Time
 }
 
 type Homework struct {
 	gorm.Model
-	description     string
+	Description     string
 	LessonID        uint
-	deadline        time.Time
-	MaxScore        string
-	HomeworkFiles   []HomeworkFile
-	HomeworkAnswers []HomeworkAnswer
+	Deadline        time.Time
+	MaxScore        int
+	HomeworkFiles   []*HomeworkFile
+	HomeworkAnswers []*HomeworkAnswer
 }
 
 type HomeworkFile struct {
@@ -61,26 +73,30 @@ type HomeworkFile struct {
 
 type HomeworkAnswer struct {
 	gorm.Model
+	Text                string
 	HomeworkID          uint
-	text                string
-	HomeworkAnswerFiles []HomeworkAnswerFile
-	TeacherResume       []TeacherResume
+	StudentID           uint
+	HomeworkAnswerFiles []*HomeworkAnswerFile
+	TeacherResumes      []*TeacherResume
 }
 
 type HomeworkAnswerFile struct {
 	gorm.Model
 	HomeworkAnswerID uint
-	filepath         string
+	Filepath         string
 }
 
 type TeacherResume struct {
 	gorm.Model
 	HomeworkAnswerID   uint
-	TeacherResumeFiles []TeacherResumeFile
+	Comment            string
+	Score              int
+	TeacherID          uint
+	TeacherResumeFiles []*TeacherResumeFile
 }
 
 type TeacherResumeFile struct {
 	gorm.Model
 	TeacherResumeID uint
-	filepath        string
+	Filepath        string
 }

@@ -19,9 +19,8 @@ func New(dbString string) (*Storage, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
-
 	err = db.AutoMigrate(&models.Student{}, &models.Teacher{}, &models.Group{},
-		&models.Subject{}, &models.Lesson{}, &models.Homework{},
+		&models.Subject{}, &models.Lesson{}, &models.StudentsToGroups{}, &models.Homework{},
 		&models.HomeworkAnswer{}, &models.HomeworkFile{},
 		&models.HomeworkAnswerFile{}, &models.TeacherResume{}, &models.TeacherResumeFile{})
 
@@ -30,15 +29,4 @@ func New(dbString string) (*Storage, error) {
 	}
 
 	return &Storage{Db: db}, nil
-}
-
-func (s *Storage) GetAllStudents(id string) error {
-	const op = "storage.postgres.GetAll"
-
-	var student models.Student
-	var _ []models.Student
-
-	_ = s.Db.Table("students").First(&student)
-
-	return nil
 }
