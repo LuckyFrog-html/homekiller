@@ -10,7 +10,7 @@ import (
 	"server/internal/config"
 	"server/internal/http_server/middlewares"
 	"server/internal/lib/logger/sl"
-	"server/microservices/gateway_microservice/routes/students/auth"
+	"server/microservices/gateway_microservice/routes/all_gateways"
 )
 
 const (
@@ -47,6 +47,8 @@ func Start() {
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat) // Хз, надо ли оно нам
 
-	router.Post("/auth*", auth.New(log, conn))
+	//router.Post("/auth*", auth.New(log, conn))
+	router.Post("/*", all_gateways.NewGatewayPostRoute(log, conn))
+	router.Get("/*", all_gateways.NewGatewayGetRoute(log, conn))
 	http.ListenAndServe(":8080", router)
 }
