@@ -34,6 +34,7 @@ func main() {
 
 	if err != nil {
 		log.Error("Database is not connected", sl.Err(err))
+		panic("Database is not connected!")
 	}
 
 	nc.Subscribe("post.student", student_handler.AddStudentHandler(log, storage))

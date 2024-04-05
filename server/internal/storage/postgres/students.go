@@ -25,3 +25,20 @@ func (s *Storage) GetStudentByID(id uint) error {
 
 	return nil
 }
+
+func (s *Storage) AddStudent(name string, stage int64, login, password string) models.Student {
+	const op = "storage.postgres.AddStudent"
+
+	student := models.Student{
+		Name:     name,
+		Stage:    stage,
+		Login:    login,
+		Password: password,
+	}
+
+	result := s.Db.Create(&student)
+
+	print(result)
+
+	return student
+}

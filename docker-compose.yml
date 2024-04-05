@@ -18,11 +18,12 @@ services:
     depends_on:
       - nats
   db:
+    container_name: "db"
     image: postgres
     environment:
-      POSTGRES_USER: postgres
+      POSTGRES_USER: gorm
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+      POSTGRES_DB: homekiller
     ports:
       - "5432:5432"
   nats:

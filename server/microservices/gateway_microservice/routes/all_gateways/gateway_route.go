@@ -3,8 +3,10 @@ package all_gateways
 import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/nats-io/nats.go"
+	"io"
 	"log/slog"
 	"net/http"
+	"server/internal/http_server/network/communication"
 	"server/internal/lib/logger/sl"
 	"strings"
 	"time"
@@ -17,10 +19,11 @@ func NewGatewayPostRoute(log *slog.Logger, natsConnection *nats.Conn) http.Handl
 		)
 
 		var data []byte
-
-		_, err := r.Body.Read(data)
+		data, err := io.ReadAll(r.Body)
 		if err != nil {
 			log.Error("Can't read body", sl.Err(err))
+			w.WriteHeader(400)
+			w.Write([]byte("Can't read body"))
 			return
 		}
 
@@ -33,10 +36,20 @@ func NewGatewayPostRoute(log *slog.Logger, natsConnection *nats.Conn) http.Handl
 		if err != nil {
 			log.Error("Nats request broken", sl.Err(err))
 			w.WriteHeader(500)
+			w.Write([]byte("Nats request broken"))
 			return
 		}
 
-		_, err = w.Write(msg.Data)
+		reply, err := communication.MessageFromJson(msg.Data)
+		if err != nil {
+			log.Error("Cannot parse message", sl.Err(err))
+			w.WriteHeader(500)
+			w.Write([]byte("Cannot parse message"))
+			return
+		}
+
+		w.WriteHeader(reply.StatusCode)
+		_, err = w.Write(reply.Data)
 		if err != nil {
 			log.Error("Cannot write message", sl.Err(err))
 			return
@@ -57,7 +70,15 @@ func NewGatewayGetRoute(log *slog.Logger, natsConnection *nats.Conn) http.Handle
 			return
 		}
 
-		_, err = w.Write(msg.Data)
+		reply, err := communication.MessageFromJson(msg.Data)
+		if err != nil {
+			log.Error("Cannot parse message", sl.Err(err))
+			w.Write([]byte("Cannot parse message"))
+			return
+		}
+
+		_, err = w.Write(reply.Data)
+		w.WriteHeader(reply.StatusCode)
 		if err != nil {
 			log.Error("Cannot write message", sl.Err(err))
 			return
