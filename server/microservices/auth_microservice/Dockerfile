@@ -1,4 +1,4 @@
-FROM golang:latest as builder
+FROM golang:alpine as builder
 
 WORKDIR /app
 
@@ -6,7 +6,7 @@ COPY . .
 
 RUN go mod download
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./microservices/auth_microservice/cmd/main.go
+RUN GOOS=linux go build -a -o main ./microservices/auth_microservice/cmd/main.go
 
 FROM alpine:latest
 

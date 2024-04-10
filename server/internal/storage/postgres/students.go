@@ -1,6 +1,9 @@
 package postgres
 
-import "server/models"
+import (
+	"fmt"
+	"server/models"
+)
 
 func (s *Storage) GetAllStudents() error {
 	const op = "storage.postgres.GetAllStudents"
@@ -41,4 +44,22 @@ func (s *Storage) AddStudent(name string, stage int64, login, password string) m
 	print(result)
 
 	return student
+}
+
+func (s *Storage) GetStudentByLogin(login, password string) (models.Student, error) {
+	const op = "storage.postgres.GetStudentByLogin"
+
+	var student models.Student
+
+	result := s.Db.Table("students").First(&student, "login = ?", login)
+
+	if result.Error != nil {
+		return models.Student{}, result.Error
+	}
+
+	if !student.CheckPassword(password) {
+		return models.Student{}, fmt.Errorf("password is incorrect")
+	}
+
+	return student, nil
 }

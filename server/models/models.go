@@ -16,6 +16,10 @@ type Student struct {
 	Groups           []*Group `gorm:"many2many:students_to_groups;"`
 }
 
+func (s *Student) CheckPassword(password string) bool {
+	return s.Password == password
+}
+
 type Teacher struct {
 	gorm.Model
 	Name           string

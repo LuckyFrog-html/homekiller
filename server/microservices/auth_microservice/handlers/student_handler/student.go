@@ -4,40 +4,40 @@ import (
 	"encoding/json"
 	"github.com/nats-io/nats.go"
 	"log/slog"
+	"net/http"
 	"server/internal/http_server/network/communication"
-	"server/internal/lib/logger/sl"
+	communicationJson "server/internal/http_server/network/communication/json"
 	"server/internal/storage/postgres"
 )
 
-type StudentJson struct {
-	Name     string `json:"name"`
-	Stage    int64  `json:"stage"`
-	Login    string `json:"login"`
-	Password string `json:"password"`
-}
-
 func AddStudentHandler(logger *slog.Logger, storage *postgres.Storage) nats.MsgHandler {
 	return func(msg *nats.Msg) {
-		var studentData StudentJson
+		var studentData communicationJson.AddStudentJson
 		if err := json.Unmarshal(msg.Data, &studentData); err != nil {
-			logger.With(slog.String("request", string(msg.Data))).
-				Error("Can't unmarshal data. BadRequest", sl.Err(err))
-			reply, err := communication.NewJsonMessage([]byte("Can't unmarshal data. BadRequest"), 400)
-			if err != nil {
-				logger.Error("Can't marshal message", sl.Err(err))
-			}
-			msg.Respond(reply)
+			communication.Error(msg, logger, err, "Can't unmarshal data. BadRequest", http.StatusBadRequest)
 			return
 		}
 
 		student := storage.AddStudent(studentData.Name, studentData.Stage, studentData.Login, studentData.Password)
 
-		marshal, _ := json.Marshal(communication.NewResponse("Student added", []byte(student.Name)))
+		communication.SendReply(msg, logger, communication.NewResponse("Student added", []byte(student.Name)), http.StatusOK)
+	}
+}
 
-		reply, err := communication.NewJsonMessage(marshal, 200)
-		if err != nil {
-			logger.Error("Can't marshal message", sl.Err(err))
+func LoginStudentHandler(logger *slog.Logger, storage *postgres.Storage) nats.MsgHandler {
+	return func(msg *nats.Msg) {
+		var studentData communicationJson.GetStudentJson
+		if err := json.Unmarshal(msg.Data, &studentData); err != nil {
+			communication.Error(msg, logger, err, "Can't unmarshal data. BadRequest", http.StatusBadRequest)
+			return
 		}
-		msg.Respond(reply)
+
+		student, err := storage.GetStudentByLogin(studentData.Login, studentData.Password)
+		if err != nil {
+			communication.Error(msg, logger, err, "Can't find student", http.StatusBadRequest)
+			return
+		}
+
+		communication.SendReply(msg, logger, communication.NewResponse("Student found", []byte(student.Name)), http.StatusOK)
 	}
 }
