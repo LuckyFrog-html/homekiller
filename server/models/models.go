@@ -1,6 +1,7 @@
 package models
 
 import (
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"time"
 )
@@ -17,7 +18,8 @@ type Student struct {
 }
 
 func (s *Student) CheckPassword(password string) bool {
-	return s.Password == password
+	err := bcrypt.CompareHashAndPassword([]byte(s.Password), []byte(password))
+	return err == nil
 }
 
 type Teacher struct {

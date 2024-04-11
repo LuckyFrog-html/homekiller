@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
 	"server/models"
 )
 
@@ -32,11 +33,13 @@ func (s *Storage) GetStudentByID(id uint) error {
 func (s *Storage) AddStudent(name string, stage int64, login, password string) models.Student {
 	const op = "storage.postgres.AddStudent"
 
+	bytes, _ := bcrypt.GenerateFromPassword([]byte(password), 14)
+
 	student := models.Student{
 		Name:     name,
 		Stage:    stage,
 		Login:    login,
-		Password: password,
+		Password: string(bytes),
 	}
 
 	s.Db.Create(&student)
