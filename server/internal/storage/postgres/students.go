@@ -43,6 +43,7 @@ func (s *Storage) AddStudent(name string, stage int64, login, password string) m
 	}
 
 	s.Db.Create(&student)
+	s.Db.Commit()
 
 	return student
 }
@@ -63,4 +64,15 @@ func (s *Storage) GetStudentByLogin(login, password string) (models.Student, err
 	}
 
 	return student, nil
+}
+
+func (s *Storage) GetStudentsByGroup(groupId uint) ([]*models.Student, error) {
+	var group models.Group
+
+	result := s.Db.First(&group, groupId)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return group.Students, nil
 }

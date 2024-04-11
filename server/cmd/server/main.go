@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/docgen"
 	"github.com/go-chi/jwtauth"
 	"log/slog"
 	"net/http"
@@ -13,7 +14,9 @@ import (
 	"server/internal/http_server/middlewares"
 	"server/internal/lib/logger/sl"
 	"server/internal/storage/postgres"
-	"server/routes"
+	"server/routes/groups"
+	"server/routes/students"
+	"server/routes/teachers"
 )
 
 func main() {
@@ -38,9 +41,9 @@ func Start() {
 	router := CreateRouter(log, storage)
 
 	// Сборка документации
-	//doc := docgen.MarkdownDoc{Router: router}
-	//err = doc.Generate()
-	//os.WriteFile("res.md", []byte(doc.String()), 0666)
+	doc := docgen.MarkdownDoc{Router: router}
+	err = doc.Generate()
+	os.WriteFile("res.md", []byte(doc.String()), 0666)
 
 	http.ListenAndServe(":8080", router)
 }
@@ -58,14 +61,19 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 	router.Group(func(r chi.Router) {
 		r.Use(jwtauth.Verifier(tokenAuth))
 		r.Use(jwtauth.Authenticator)
+		r.Use(middlewares.TeacherAuth)
 
 		// Авторизованные запросы
 
-		r.Post("/students", routes.AddStudentHandler(log, storage))
+		r.Post("/students", students.AddStudentHandler(log, storage))
+		r.Post("/groups", groups.AddGroup(log, storage))
+		r.Post("/groups/{group_id}/students", groups.AddStudentsToGroup(log, storage))
+		r.Get("/groups/{group_id}/students", groups.GetStudentsFromGroup(log, storage))
 	})
 	router.Group(func(r chi.Router) {
 		// Неавторизованные запросы
-		r.Post("/login", routes.LoginStudentHandler(log, storage))
+		r.Post("/login", students.LoginStudentHandler(log, storage))
+		r.Post("/teachers/login", teachers.LoginTeacher(log, storage))
 	})
 
 	return router

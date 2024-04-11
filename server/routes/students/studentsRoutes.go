@@ -1,8 +1,7 @@
-package routes
+package students
 
 import (
 	"encoding/json"
-	"github.com/go-chi/jwtauth"
 	"log/slog"
 	"net/http"
 	"server/internal/http_server/middlewares"
@@ -13,17 +12,6 @@ import (
 
 func AddStudentHandler(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, claims, err := jwtauth.FromContext(r.Context())
-		if err != nil {
-			logger.Error("Can't find jwt", sl.Err(err))
-			http.Error(w, err.Error(), http.StatusForbidden)
-			return
-		}
-		if claims["table"] == nil || claims["table"] != "teachers" {
-			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
-			return
-		}
-
 		var studentData communicationJson.AddStudentJson
 
 		if err := json.NewDecoder(r.Body).Decode(&studentData); err != nil {
@@ -67,6 +55,15 @@ func LoginStudentHandler(logger *slog.Logger, storage *postgres.Storage) http.Ha
 			logger.Error("Can't get jwt", sl.Err(err))
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
-		json.NewEncoder(w).Encode(map[string]interface{}{"token": token})
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{"token": token}); err != nil {
+			logger.Error("Cannot encode token", sl.Err(err))
+		}
+	}
+}
+
+func GetStudentsByGroup(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		//students, err := storage.GetStudentsByGroup()
+		// TODO: Дописать получение студентов по группе (по id группы)
 	}
 }
