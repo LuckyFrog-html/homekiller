@@ -39,9 +39,7 @@ func (s *Storage) AddStudent(name string, stage int64, login, password string) m
 		Password: password,
 	}
 
-	result := s.Db.Create(&student)
-
-	print(result)
+	s.Db.Create(&student)
 
 	return student
 }

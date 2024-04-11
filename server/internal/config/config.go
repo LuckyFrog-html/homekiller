@@ -11,7 +11,6 @@ type Config struct {
 	Env        string `yaml:"env" env-default:"local"`
 	HTTPServer `yaml:"http_server"`
 	DBConf     DatabaseConfig `yaml:"database"`
-	NatsConf   NatsConfig     `yaml:"nats"`
 }
 
 type HTTPServer struct {
@@ -26,10 +25,6 @@ type DatabaseConfig struct {
 	Password string `yaml:"password"`
 	DBName   string `yaml:"dbname"`
 	Port     int    `yaml:"port"`
-}
-
-type NatsConfig struct {
-	Host string `yaml:"nats_address"`
 }
 
 func MustLoad(configPath string) *Config {

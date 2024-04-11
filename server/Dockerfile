@@ -6,13 +6,9 @@ COPY . .
 
 RUN go mod download
 
-RUN GOOS=linux go build -a -o main ./microservices/auth_microservice/cmd/main.go
+RUN GOOS=linux go build -a -o main ./cmd/server/main.go
 
 FROM alpine:latest
-
-#RUN apk update && apk --no-cache add ca-certificates
-#
-#RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
 
