@@ -32,6 +32,10 @@ type Teacher struct {
 	Groups         []*Group
 }
 
+func (t *Teacher) CheckPassword(password string) bool {
+	return bcrypt.CompareHashAndPassword([]byte(t.Password), []byte(password)) == nil
+}
+
 type Group struct {
 	gorm.Model
 	Title     string

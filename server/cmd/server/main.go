@@ -53,6 +53,7 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 	router.Use(middlewares.New(log))
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat) // Хз, надо ли оно нам
+	router.Use(middlewares.JWTAuthHolder(tokenAuth))
 
 	router.Group(func(r chi.Router) {
 		r.Use(jwtauth.Verifier(tokenAuth))
@@ -64,6 +65,7 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 	})
 	router.Group(func(r chi.Router) {
 		// Неавторизованные запросы
+		r.Post("/login", routes.LoginStudentHandler(log, storage))
 	})
 
 	return router

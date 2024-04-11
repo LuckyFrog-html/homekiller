@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"github.com/go-chi/jwtauth"
 	"log/slog"
 	"net/http"
 	"server/internal/http_server/middlewares"
@@ -12,6 +13,17 @@ import (
 
 func AddStudentHandler(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		_, claims, err := jwtauth.FromContext(r.Context())
+		if err != nil {
+			logger.Error("Can't find jwt", sl.Err(err))
+			http.Error(w, err.Error(), http.StatusForbidden)
+			return
+		}
+		if claims["table"] == nil || claims["table"] != "teachers" {
+			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
+			return
+		}
+
 		var studentData communicationJson.AddStudentJson
 
 		if err := json.NewDecoder(r.Body).Decode(&studentData); err != nil {
