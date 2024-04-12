@@ -86,6 +86,7 @@ func GetStudentsFromGroup(logger *slog.Logger, storage *postgres.Storage) http.H
 
 		group, err := storage.GetGroupById(uint(groupId))
 		if err != nil {
+			fmt.Println(err)
 			http.Error(w, "Group not found", http.StatusNotFound)
 			return
 		}

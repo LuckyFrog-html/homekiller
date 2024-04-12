@@ -17,7 +17,7 @@ func (s *Storage) AddGroup(title string, teacherId uint) models.Group {
 func (s *Storage) GetGroupById(id uint) (models.Group, error) {
 	var group models.Group
 
-	result := s.Db.First(&group, id)
+	result := s.Db.Preload("Students").First(&group, "id = ?", id)
 
 	if result.Error != nil {
 		return models.Group{}, result.Error
@@ -33,4 +33,12 @@ func (s *Storage) AddStudentsToGroup(groupId uint, studentsIds []uint) {
 		s.Db.Create(&studentToGroup)
 	}
 	s.Db.Commit()
+}
+
+func (s *Storage) IsStudentInGroup(groupId, studentId uint) bool {
+	var studentToGroup models.StudentsToGroups
+
+	result := s.Db.First(&studentToGroup, "group_id = ? AND student_id = ?", groupId, studentId)
+
+	return result.Error == nil
 }

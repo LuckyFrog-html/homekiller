@@ -20,7 +20,8 @@ func JWTAuthHolder(tokenAuth *jwtauth.JWTAuth) func(next http.Handler) http.Hand
 
 func TeacherAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, claims, err := jwtauth.FromContext(r.Context())
+		ctx := r.Context()
+		_, claims, err := jwtauth.FromContext(ctx)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusForbidden)
 			return
@@ -29,8 +30,23 @@ func TeacherAuth(next http.Handler) http.Handler {
 			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
 			return
 		}
-		next.ServeHTTP(w, r)
+
+		ctx = context.WithValue(ctx, "teacher_id", claims["id"])
+
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func GetTeacherIdFromContext(ctx context.Context) (uint, error) {
+	val := ctx.Value("teacher_id")
+	if val == nil {
+		return 0, fmt.Errorf("can't find teacher_id value")
+	}
+	res, ok := val.(uint)
+	if !ok {
+		return 0, fmt.Errorf("can't use ctx value as uint")
+	}
+	return res, nil
 }
 
 func GetAuthTokenFromContext(ctx context.Context) (*jwtauth.JWTAuth, error) {

@@ -53,7 +53,7 @@ func (s *Storage) GetStudentByLogin(login, password string) (models.Student, err
 
 	var student models.Student
 
-	result := s.Db.Table("students").First(&student, "login = ?", login)
+	result := s.Db.Preload("Lessons").Preload("Groups").Preload("HomeworkAnswers").First(&student, "login = ?", login)
 
 	if result.Error != nil {
 		return models.Student{}, result.Error
@@ -69,7 +69,7 @@ func (s *Storage) GetStudentByLogin(login, password string) (models.Student, err
 func (s *Storage) GetStudentsByGroup(groupId uint) ([]*models.Student, error) {
 	var group models.Group
 
-	result := s.Db.First(&group, groupId)
+	result := s.Db.Preload("Students").First(&group, groupId)
 	if result.Error != nil {
 		return nil, result.Error
 	}

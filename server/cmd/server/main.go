@@ -15,6 +15,7 @@ import (
 	"server/internal/lib/logger/sl"
 	"server/internal/storage/postgres"
 	"server/routes/groups"
+	"server/routes/lessons"
 	"server/routes/students"
 	"server/routes/teachers"
 )
@@ -63,12 +64,21 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 		r.Use(jwtauth.Authenticator)
 		r.Use(middlewares.TeacherAuth)
 
-		// Авторизованные запросы
+		// Авторизованные запросы для учителей
 
 		r.Post("/students", students.AddStudentHandler(log, storage))
 		r.Post("/groups", groups.AddGroup(log, storage))
 		r.Post("/groups/{group_id}/students", groups.AddStudentsToGroup(log, storage))
 		r.Get("/groups/{group_id}/students", groups.GetStudentsFromGroup(log, storage))
+
+		r.Post("/groups/{group_id}/lessons", lessons.AddLesson(log, storage))
+	})
+	router.Group(func(r chi.Router) {
+		r.Use(jwtauth.Verifier(tokenAuth))
+		r.Use(jwtauth.Authenticator)
+
+		// Авторизованные запросы для студентов
+		r.Get("/groups/{group_id}/lessons", lessons.GetLessons(log, storage))
 	})
 	router.Group(func(r chi.Router) {
 		// Неавторизованные запросы
