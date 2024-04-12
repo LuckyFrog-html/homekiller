@@ -18,16 +18,18 @@ func (s *Storage) GetAllStudents() error {
 	return nil
 }
 
-func (s *Storage) GetStudentByID(id uint) error {
+func (s *Storage) GetStudentByID(id uint) (*models.Student, error) {
 	const op = "storage.postgres.GetStudentByID"
 
 	var student models.Student
 
-	students := s.Db.Table("students").First(&student, id)
+	result := s.Db.First(&student, id)
 
-	print(students)
+	if result.Error != nil {
+		return nil, result.Error
+	}
 
-	return nil
+	return &student, nil
 }
 
 func (s *Storage) AddStudent(name string, stage int64, login, password string) models.Student {
@@ -75,4 +77,13 @@ func (s *Storage) GetStudentsByGroup(groupId uint) ([]*models.Student, error) {
 	}
 
 	return group.Students, nil
+}
+
+func (s *Storage) MarkStudentAttendance(studentsIds []uint, lessonId uint) {
+	for _, studentId := range studentsIds {
+		studentToLesson := models.StudentsToLessons{StudentID: studentId, LessonID: lessonId}
+
+		s.Db.Create(&studentToLesson)
+	}
+	s.Db.Commit()
 }

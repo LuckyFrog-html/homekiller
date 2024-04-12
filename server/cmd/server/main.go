@@ -72,6 +72,7 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 		r.Get("/groups/{group_id}/students", groups.GetStudentsFromGroup(log, storage))
 
 		r.Post("/groups/{group_id}/lessons", lessons.AddLesson(log, storage))
+		r.Post("/groups/{group_id}/lessons/{lesson_id}", lessons.MarkStudentAttendance(log, storage))
 	})
 	router.Group(func(r chi.Router) {
 		r.Use(jwtauth.Verifier(tokenAuth))
@@ -79,6 +80,7 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 
 		// Авторизованные запросы для студентов
 		r.Get("/groups/{group_id}/lessons", lessons.GetLessons(log, storage))
+		r.Get("/groups/{group_id}/lessons/{lesson_id}", lessons.GetLessonByGroup(log, storage))
 	})
 	router.Group(func(r chi.Router) {
 		// Неавторизованные запросы

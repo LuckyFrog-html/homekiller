@@ -43,6 +43,7 @@ type Group struct {
 	TeacherID uint
 	Students  []*Student `gorm:"many2many:students_to_groups;"`
 	Lessons   []*Lesson
+	Teacher   *Teacher
 }
 
 type Subject struct {
@@ -56,7 +57,8 @@ type Lesson struct {
 	Date      time.Time
 	GroupID   uint
 	Homeworks []*Homework
-	Student   []*Student `gorm:"many2many:students_to_lessons;"`
+	Students  []*Student `gorm:"many2many:students_to_lessons;"`
+	Group     *Group
 }
 
 type StudentsToGroups struct {
@@ -73,12 +75,14 @@ type Homework struct {
 	MaxScore        int
 	HomeworkFiles   []*HomeworkFile
 	HomeworkAnswers []*HomeworkAnswer
+	Lesson          *Lesson
 }
 
 type HomeworkFile struct {
 	gorm.Model
 	HomeworkID uint
 	Filepath   string
+	Homework   *Homework
 }
 
 type HomeworkAnswer struct {
@@ -88,12 +92,15 @@ type HomeworkAnswer struct {
 	StudentID           uint
 	HomeworkAnswerFiles []*HomeworkAnswerFile
 	TeacherResumes      []*TeacherResume
+	Student             *Student
+	Homework            *Homework
 }
 
 type HomeworkAnswerFile struct {
 	gorm.Model
 	HomeworkAnswerID uint
 	Filepath         string
+	HomeworkAnswer   *HomeworkAnswer
 }
 
 type TeacherResume struct {
@@ -103,10 +110,21 @@ type TeacherResume struct {
 	Score              int
 	TeacherID          uint
 	TeacherResumeFiles []*TeacherResumeFile
+	Teacher            *Teacher
+	HomeworkAnswer     *HomeworkAnswer
 }
 
 type TeacherResumeFile struct {
 	gorm.Model
 	TeacherResumeID uint
 	Filepath        string
+	TeacherResume   *TeacherResume
+}
+
+type StudentsToLessons struct {
+	gorm.Model
+	StudentID uint
+	LessonID  uint
+	Group     *Group
+	Lesson    *Lesson
 }
