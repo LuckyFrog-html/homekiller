@@ -20,6 +20,23 @@ export const actions: Actions = {
         }
 
         console.log(form.data.username)
+        console.log(form.data.password)
+        const response = await fetch('http://localhost:8080/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                login: form.data.username,
+                password: form.data.password
+            }),
+        });
+        console.log(response);
+        if (response.status === 401) {
+            return fail(401, {
+                form,
+            });
+        }
 
         return {
             form,
