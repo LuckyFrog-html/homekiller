@@ -55,7 +55,7 @@ func (s *Storage) GetStudentByLogin(login, password string) (models.Student, err
 
 	var student models.Student
 
-	result := s.Db.Preload("Lessons").Preload("Groups").Preload("HomeworkAnswers").First(&student, "login = ?", login)
+	result := s.Db.Preload("Lessons").Preload("Groups").Preload("HomeworksAnswers").First(&student, "login = ?", login)
 
 	if result.Error != nil {
 		return models.Student{}, result.Error
