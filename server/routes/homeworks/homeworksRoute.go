@@ -2,7 +2,6 @@ package homeworks
 
 import (
 	"encoding/json"
-	"fmt"
 	"log/slog"
 	"net/http"
 	communicationJson "server/internal/http_server/network/communication/json"
@@ -40,7 +39,6 @@ func AddHomework(logger *slog.Logger, storage *postgres.Storage) http.HandlerFun
 		}
 
 		homework := storage.AddHomework(homeworkData.Description, lesson.ID, homeworkData.Deadline, homeworkData.MaxScore)
-		fmt.Println(homework.MaxScore)
 		if err := json.NewEncoder(w).Encode(homework); err != nil {
 			logger.Error("Can't marshall homework json", sl.Err(err))
 		}

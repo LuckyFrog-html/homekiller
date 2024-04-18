@@ -6,10 +6,11 @@ import (
 )
 
 func (s *Storage) AddHomework(description string, lessonId uint, deadline time.Time, maxScore int) models.Homework {
+	tx := s.Db.Begin()
 	homework := models.Homework{Description: description, LessonID: lessonId, Deadline: deadline, MaxScore: maxScore}
 
-	s.Db.Create(&homework)
-	s.Db.Commit()
+	tx.Create(&homework)
+	tx.Commit()
 
 	return homework
 }

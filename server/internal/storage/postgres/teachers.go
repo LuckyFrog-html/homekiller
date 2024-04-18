@@ -7,10 +7,10 @@ import (
 )
 
 func (s *Storage) GetTeacher(login, password string) (models.Teacher, error) {
+	tx := s.Db.Begin()
 	var teacher models.Teacher
 
-	result := s.Db.Preload("Subjects").Preload("Groups").
-		Raw("SELECT * FROM teachers WHERE login = ? LIMIT 1;", login).Scan(&teacher)
+	result := tx.Preload("Subjects").Preload("Groups").First(&teacher, "login = ?", login)
 
 	if result.Error != nil {
 		return models.Teacher{}, result.Error
@@ -24,9 +24,10 @@ func (s *Storage) GetTeacher(login, password string) (models.Teacher, error) {
 }
 
 func (s *Storage) GetTeacherById(id int) (models.Teacher, error) {
+	tx := s.Db.Begin()
 	var teacher models.Teacher
 
-	result := s.Db.First(&teacher, id)
+	result := tx.First(&teacher, id)
 
 	if result.Error != nil {
 		return models.Teacher{}, result.Error
@@ -36,6 +37,7 @@ func (s *Storage) GetTeacherById(id int) (models.Teacher, error) {
 }
 
 func (s *Storage) AddTeacher(name, login, password string) models.Teacher {
+	tx := s.Db.Begin()
 	bytes, _ := bcrypt.GenerateFromPassword([]byte(password), 14)
 
 	teacher := models.Teacher{
@@ -44,8 +46,8 @@ func (s *Storage) AddTeacher(name, login, password string) models.Teacher {
 		Password: string(bytes),
 	}
 
-	s.Db.Create(&teacher)
-	s.Db.Commit()
+	tx.Create(&teacher)
+	tx.Commit()
 
 	return teacher
 }

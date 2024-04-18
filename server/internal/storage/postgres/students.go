@@ -46,10 +46,11 @@ func (s *Storage) AddStudent(name string, stage int64, login, password string) m
 }
 
 func (s *Storage) GetStudentByLogin(login, password string) (models.Student, error) {
+	tx := s.Db.Begin()
 	var student models.Student
-	tmp := s.Db.Preload("Lessons").Preload("Groups").Preload("HomeworksAnswers")
-	result := tmp.Raw("SELECT * FROM students WHERE login = ? LIMIT 1;", login).Scan(&student)
-	//result := s.Db.Preload("Lessons").Preload("Groups").Preload("HomeworksAnswers").First(&student, "login = ?", login)
+	tmp := tx.Preload("Lessons").Preload("Groups").Preload("HomeworksAnswers")
+	//result := tmp.Raw("SELECT * FROM students WHERE login = ? LIMIT 1;", login).Scan(&student)
+	result := tmp.First(&student, "login = ?", login)
 
 	if result.Error != nil {
 		return models.Student{}, result.Error

@@ -29,7 +29,7 @@ type Teacher struct {
 	Password       string
 	TeacherResumes []*TeacherResume
 	Subjects       []*Subject `gorm:"many2many:teacher_to_subjects;"`
-	Groups         []*Group
+	Groups         []*Group   `gorm:"foreignKey:TeacherID;"`
 }
 
 func (t *Teacher) CheckPassword(password string) bool {
@@ -42,7 +42,7 @@ type Group struct {
 	IsActive  bool
 	TeacherID uint
 	Students  []*Student `gorm:"many2many:students_to_groups;"`
-	Lessons   []*Lesson
+	Lessons   []*Lesson  `gorm:"foreignKey:GroupID;"`
 	Teacher   *Teacher
 }
 

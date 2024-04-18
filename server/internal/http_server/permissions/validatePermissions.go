@@ -108,7 +108,6 @@ func ValidateTeachersPermissionInLesson(w http.ResponseWriter, r *http.Request, 
 
 	if lesson.Group.TeacherID != teacherId {
 		http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
-		logger.Error("Forbidden", sl.Err(err))
 		return nil, true
 	}
 	return lesson, false

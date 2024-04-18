@@ -6,18 +6,20 @@ import (
 )
 
 func (s *Storage) AddGroup(title string, teacherId uint) models.Group {
+	tx := s.Db.Begin()
 	group := models.Group{Title: title, TeacherID: teacherId, IsActive: true}
 
-	s.Db.Create(&group)
-	s.Db.Commit()
+	tx.Create(&group)
+	tx.Commit()
 
 	return group
 }
 
 func (s *Storage) GetGroupById(id uint) (models.Group, error) {
+	tx := s.Db.Begin()
 	var group models.Group
 
-	result := s.Db.Preload("Students").Raw("SELECT * FROM groups WHERE id=? LIMIT 1;", id).Scan(&group)
+	result := tx.Preload("Students").First(&group, "id=?", id)
 	if result.Error != nil {
 		return models.Group{}, result.Error
 	}
@@ -26,18 +28,20 @@ func (s *Storage) GetGroupById(id uint) (models.Group, error) {
 }
 
 func (s *Storage) AddStudentsToGroup(groupId uint, studentsIds []uint) {
+	tx := s.Db.Begin()
 	for _, studentId := range studentsIds {
 		studentToGroup := models.StudentsToGroups{StudentID: studentId, GroupID: groupId, AppendDate: time.Now()}
 
-		s.Db.Create(&studentToGroup)
+		tx.Create(&studentToGroup)
 	}
-	s.Db.Commit()
+	tx.Commit()
 }
 
 func (s *Storage) IsStudentInGroup(groupId, studentId uint) bool {
+	tx := s.Db.Begin()
 	var studentToGroup models.StudentsToGroups
 
-	result := s.Db.First(&studentToGroup, "group_id = ? AND student_id = ?", groupId, studentId)
+	result := tx.First(&studentToGroup, "group_id = ? AND student_id = ?", groupId, studentId)
 
 	return result.Error == nil
 }
