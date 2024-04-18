@@ -2,9 +2,9 @@ package students
 
 import (
 	"encoding/json"
+	"github.com/go-chi/jwtauth"
 	"log/slog"
 	"net/http"
-	"server/internal/http_server/middlewares"
 	communicationJson "server/internal/http_server/network/communication/json"
 	"server/internal/lib/logger/sl"
 	"server/internal/storage/postgres"
@@ -28,7 +28,7 @@ func AddStudentHandler(logger *slog.Logger, storage *postgres.Storage) http.Hand
 	}
 }
 
-func LoginStudentHandler(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
+func LoginStudentHandler(logger *slog.Logger, storage *postgres.Storage, authToken *jwtauth.JWTAuth) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var studentData communicationJson.GetStudentJson
 
@@ -43,14 +43,8 @@ func LoginStudentHandler(logger *slog.Logger, storage *postgres.Storage) http.Ha
 			return
 		}
 
-		jwtAuthToken, err := middlewares.GetAuthTokenFromContext(r.Context())
-		if err != nil {
-			logger.Error("Can't get jwt auth token", sl.Err(err))
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-
 		claims := map[string]interface{}{"id": student.ID, "login": student.Login, "table": "students"}
-		_, token, err := jwtAuthToken.Encode(claims)
+		_, token, err := authToken.Encode(claims)
 		if err != nil {
 			logger.Error("Can't get jwt", sl.Err(err))
 			http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -17,8 +17,7 @@ func (s *Storage) AddGroup(title string, teacherId uint) models.Group {
 func (s *Storage) GetGroupById(id uint) (models.Group, error) {
 	var group models.Group
 
-	result := s.Db.Preload("Students").First(&group, "id = ?", id)
-
+	result := s.Db.Preload("Students").Raw("SELECT * FROM groups WHERE id=? LIMIT 1;", id).Scan(&group)
 	if result.Error != nil {
 		return models.Group{}, result.Error
 	}

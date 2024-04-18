@@ -10,7 +10,7 @@ type Student struct {
 	gorm.Model
 	Name             string
 	Stage            int64
-	Login            string
+	Login            string `gorm:"unique;"`
 	Password         string
 	Lessons          []*Lesson `gorm:"many2many:students_to_lessons;"`
 	HomeworksAnswers []*HomeworkAnswer
@@ -25,7 +25,7 @@ func (s *Student) CheckPassword(password string) bool {
 type Teacher struct {
 	gorm.Model
 	Name           string
-	Login          string
+	Login          string `gorm:"unique;"`
 	Password       string
 	TeacherResumes []*TeacherResume
 	Subjects       []*Subject `gorm:"many2many:teacher_to_subjects;"`

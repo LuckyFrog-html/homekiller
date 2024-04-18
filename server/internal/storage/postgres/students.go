@@ -7,7 +7,6 @@ import (
 )
 
 func (s *Storage) GetAllStudents() error {
-	const op = "storage.postgres.GetAllStudents"
 
 	var student models.Student
 
@@ -19,11 +18,9 @@ func (s *Storage) GetAllStudents() error {
 }
 
 func (s *Storage) GetStudentByID(id uint) (*models.Student, error) {
-	const op = "storage.postgres.GetStudentByID"
-
 	var student models.Student
 
-	result := s.Db.First(&student, id)
+	result := s.Db.Raw("SELECT * FROM students WHERE id = ? LIMIT 1;", id).Scan(&student)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -33,8 +30,6 @@ func (s *Storage) GetStudentByID(id uint) (*models.Student, error) {
 }
 
 func (s *Storage) AddStudent(name string, stage int64, login, password string) models.Student {
-	const op = "storage.postgres.AddStudent"
-
 	bytes, _ := bcrypt.GenerateFromPassword([]byte(password), 14)
 
 	student := models.Student{
@@ -51,11 +46,10 @@ func (s *Storage) AddStudent(name string, stage int64, login, password string) m
 }
 
 func (s *Storage) GetStudentByLogin(login, password string) (models.Student, error) {
-	const op = "storage.postgres.GetStudentByLogin"
-
 	var student models.Student
-
-	result := s.Db.Preload("Lessons").Preload("Groups").Preload("HomeworksAnswers").First(&student, "login = ?", login)
+	tmp := s.Db.Preload("Lessons").Preload("Groups").Preload("HomeworksAnswers")
+	result := tmp.Raw("SELECT * FROM students WHERE login = ? LIMIT 1;", login).Scan(&student)
+	//result := s.Db.Preload("Lessons").Preload("Groups").Preload("HomeworksAnswers").First(&student, "login = ?", login)
 
 	if result.Error != nil {
 		return models.Student{}, result.Error

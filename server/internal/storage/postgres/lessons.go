@@ -16,10 +16,11 @@ func (s *Storage) AddLesson(date time.Time, groupId uint) *models.Lesson {
 }
 
 func (s *Storage) GetLessonById(lessonId uint) (*models.Lesson, error) {
-	var lesson *models.Lesson
-	result := s.Db.Preload("Homeworks").First(lesson, "id = ?", lessonId)
+	var lesson models.Lesson
+	result := s.Db.Preload("Homeworks").Preload("Students").Preload("Groups").
+		Raw("SELECT * FROM lessons WHERE id=? LIMIT 1;", lessonId).Scan(&lesson)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return lesson, nil
+	return &lesson, nil
 }

@@ -7,11 +7,10 @@ import (
 )
 
 func (s *Storage) GetTeacher(login, password string) (models.Teacher, error) {
-	const op = "storage.postgres.GetStudentByLogin"
-
 	var teacher models.Teacher
 
-	result := s.Db.First(&teacher, "login = ?", login)
+	result := s.Db.Preload("Subjects").Preload("Groups").
+		Raw("SELECT * FROM teachers WHERE login = ? LIMIT 1;", login).Scan(&teacher)
 
 	if result.Error != nil {
 		return models.Teacher{}, result.Error

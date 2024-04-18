@@ -42,11 +42,13 @@ func GetTeacherIdFromContext(ctx context.Context) (uint, error) {
 	if val == nil {
 		return 0, fmt.Errorf("can't find teacher_id value")
 	}
-	res, ok := val.(uint)
+	fmt.Println(val)
+	res, ok := val.(float64)
+	fmt.Println(res, ok)
 	if !ok {
 		return 0, fmt.Errorf("can't use ctx value as uint")
 	}
-	return res, nil
+	return uint(res), nil
 }
 
 func GetAuthTokenFromContext(ctx context.Context) (*jwtauth.JWTAuth, error) {
