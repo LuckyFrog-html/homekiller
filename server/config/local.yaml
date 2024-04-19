@@ -9,3 +9,4 @@ database:
   password: "postgres"
   dbname: "main"
   port: 8000
+storage_path: "files"

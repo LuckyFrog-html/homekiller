@@ -8,15 +8,16 @@ docker-compose up -d
 ```yaml
 env: "local"
 http_server:
-  address: "localhost:3002"
-  timeout: "4s"
-  idle_timeout: "60s"
+   address: "localhost:3002"
+   timeout: "4s"
+   idle_timeout: "60s"
 database:
-  host: "localhost"
-  user: "postgres"
-  password: "postgres"
-  dbname: "homekiller"
-  port: 8000
+   host: "localhost"
+   user: "postgres"
+   password: "postgres"
+   dbname: "main"
+   port: 8000
+storage_path: "files"
 ```
 Заполните его своими данными.
 ## Endpoints

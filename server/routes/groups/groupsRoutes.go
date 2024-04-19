@@ -27,6 +27,7 @@ func AddGroup(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
 
 		group := storage.AddGroup(groupData.Title, uint(claims["id"].(float64)))
 
+		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(group); err != nil {
 			logger.Error("Can't marshall group json", sl.Err(err))
 		}
@@ -66,6 +67,7 @@ func AddStudentsToGroup(logger *slog.Logger, storage *postgres.Storage) http.Han
 
 		storage.AddStudentsToGroup(uint(groupId), groupData.StudentsIds)
 
+		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(map[string]interface{}{"status": "added"}); err != nil {
 			logger.Error("Can't marshall student json", sl.Err(err))
 		}
@@ -97,6 +99,7 @@ func GetStudentsFromGroup(logger *slog.Logger, storage *postgres.Storage) http.H
 		}
 		fmt.Println(group.Students)
 
+		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(map[string]interface{}{"students": group.Students}); err != nil {
 			logger.Error("Can't marshall students json", sl.Err(err))
 		}

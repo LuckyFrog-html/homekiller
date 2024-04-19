@@ -30,6 +30,7 @@ func LoginTeacher(logger *slog.Logger, storage *postgres.Storage, authToken *jwt
 			logger.Error("Can't get jwt", sl.Err(err))
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
+		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(map[string]interface{}{"token": token}); err != nil {
 			logger.Error("Cannot encode token", sl.Err(err))
 		}

@@ -21,7 +21,7 @@ func AddStudentHandler(logger *slog.Logger, storage *postgres.Storage) http.Hand
 		}
 
 		student := storage.AddStudent(studentData.Name, studentData.Stage, studentData.Login, studentData.Password)
-
+		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(student); err != nil {
 			logger.Error("Can't marshall student json", sl.Err(err))
 		}
@@ -49,6 +49,7 @@ func LoginStudentHandler(logger *slog.Logger, storage *postgres.Storage, authTok
 			logger.Error("Can't get jwt", sl.Err(err))
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
+		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(map[string]interface{}{"token": token}); err != nil {
 			logger.Error("Cannot encode token", sl.Err(err))
 		}

@@ -12,6 +12,7 @@ import (
 	"server/internal/config"
 	"server/internal/http_server/middlewares"
 	"server/internal/lib/logger/sl"
+	"server/internal/storage/file_storage"
 	"server/internal/storage/postgres"
 	"server/routes/groups"
 	"server/routes/homeworks"
@@ -38,6 +39,8 @@ func Start() {
 		fmt.Println(err)
 		panic("Database is not connected!")
 	}
+
+	file_storage.InitFileStorage(cfg.StoragePath, log)
 
 	router := CreateRouter(log, storage)
 
@@ -75,6 +78,7 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 		r.Post("/groups/{group_id}/lessons/{lesson_id}", lessons.MarkStudentAttendance(log, storage))
 
 		r.Post("/groups/{group_id}/lessons/{lesson_id}/homeworks", homeworks.AddHomework(log, storage))
+		r.Post("/groups/{group_id}/lessons/{lesson_id}/homeworks/{homework_id}/files", homeworks.AddHomeworkFiles(log, storage))
 	})
 	router.Group(func(r chi.Router) {
 		r.Use(jwtauth.Verifier(tokenAuth))

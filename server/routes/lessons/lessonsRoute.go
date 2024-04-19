@@ -27,6 +27,7 @@ func AddLesson(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc 
 		}
 
 		lesson := storage.AddLesson(lessonData.Date, group.ID)
+		w.Header().Set("Content-Type", "application/json")
 		if err = json.NewEncoder(w).Encode(lesson); err != nil {
 			logger.Error("Can't marshall lesson json", sl.Err(err))
 		}
@@ -41,6 +42,7 @@ func GetLessons(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc
 		}
 
 		lessons := group.Lessons
+		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(lessons); err != nil {
 			logger.Error("Can't marshall lessons json", sl.Err(err))
 		}
@@ -54,6 +56,7 @@ func GetLessonByGroup(logger *slog.Logger, storage *postgres.Storage) http.Handl
 			return
 		}
 
+		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(lesson); err != nil {
 			logger.Error("Can't marshall lesson json", sl.Err(err))
 		}
@@ -85,7 +88,10 @@ func MarkStudentAttendance(logger *slog.Logger, storage *postgres.Storage) http.
 			students = append(students, student)
 		}
 		lesson.Students = append(lesson.Students, students...)
-		storage.Db.Commit()
+		tx := storage.Db.Begin()
+		tx.Save(&lesson)
+		tx.Commit()
+		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(lesson); err != nil {
 			logger.Error("Can't marshall lesson json", sl.Err(err))
 		}
