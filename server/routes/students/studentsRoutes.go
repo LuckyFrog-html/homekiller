@@ -55,10 +55,3 @@ func LoginStudentHandler(logger *slog.Logger, storage *postgres.Storage, authTok
 		}
 	}
 }
-
-func GetStudentsByGroup(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		//students, err := storage.GetStudentsByGroup()
-		// TODO: Дописать получение студентов по группе (по id группы)
-	}
-}

@@ -79,6 +79,7 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 
 		r.Post("/groups/{group_id}/lessons/{lesson_id}/homeworks", homeworks.AddHomework(log, storage))
 		r.Post("/groups/{group_id}/lessons/{lesson_id}/homeworks/{homework_id}/files", homeworks.AddHomeworkFiles(log, storage))
+		r.Get("/students/{student_id}/homeworks", homeworks.GetHomeworksByStudentIdInRequest(log, storage))
 	})
 	router.Group(func(r chi.Router) {
 		r.Use(jwtauth.Verifier(tokenAuth))
@@ -88,6 +89,8 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 		r.Get("/groups/{group_id}/lessons", lessons.GetLessons(log, storage))
 		r.Get("/groups/{group_id}/lessons/{lesson_id}", lessons.GetLessonByGroup(log, storage))
 		r.Get("/groups/{group_id}/lessons/{lesson_id}/homeworks", homeworks.GetHomeworks(log, storage))
+		r.Get("/groups", groups.GetGroupsByStudentHandler(log, storage))
+		r.Get("/homeworks", homeworks.GetHomeworksByStudent(log, storage))
 	})
 	router.Group(func(r chi.Router) {
 		// Неавторизованные запросы

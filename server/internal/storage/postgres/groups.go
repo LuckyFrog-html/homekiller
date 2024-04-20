@@ -45,3 +45,15 @@ func (s *Storage) IsStudentInGroup(groupId, studentId uint) bool {
 
 	return result.Error == nil
 }
+
+func (s *Storage) GetGroupsByStudent(studentId uint) ([]*models.Group, error) {
+	tx := s.Db.Begin()
+	var student models.Student
+	result := tx.Preload("Groups").First(&student, studentId)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return student.Groups, nil
+}

@@ -31,3 +31,20 @@ func (s *Storage) AddHomeworkFiles(homeworkId uint, files []string) {
 	}
 	tx.Commit()
 }
+
+type StudentHomework struct {
+	models.Homework
+	IsDone     bool
+	GroupId    int
+	GroupTitle string
+}
+
+func (s *Storage) GetHomeworksByStudent(studentId uint) ([]StudentHomework, error) {
+	tx := s.Db.Begin()
+	var studentsHomeworks []StudentHomework
+	result := tx.Raw("SELECT hw.*, ls.group_id, ha.id IS NOT NULL AS IsDone, g2.title AS group_title FROM homeworks hw JOIN lessons ls ON hw.lesson_id = ls.id JOIN students_to_groups g on g.group_id = ls.group_id LEFT OUTER JOIN homework_answers ha ON ha.homework_id = hw.id AND ha.student_id = g.student_id JOIN public.groups g2 ON ls.group_id = g2.id WHERE g.student_id=?", studentId).Scan(&studentsHomeworks)
+	if result.Error != nil {
+		return studentsHomeworks, result.Error
+	}
+	return studentsHomeworks, nil
+}

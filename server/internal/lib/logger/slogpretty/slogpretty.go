@@ -88,11 +88,3 @@ func (h *PrettyHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 		attrs:   attrs,
 	}
 }
-
-func (h *PrettyHandler) WithGroup(name string) slog.Handler {
-	// TODO: implement
-	return &PrettyHandler{
-		Handler: h.Handler.WithGroup(name),
-		l:       h.l,
-	}
-}

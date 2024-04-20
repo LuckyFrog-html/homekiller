@@ -113,11 +113,17 @@ func ValidateTeachersPermissionInLesson(w http.ResponseWriter, r *http.Request, 
 	return lesson, false
 }
 
-func GetHomeworkIdFromRequest(w http.ResponseWriter, r *http.Request) (uint, error) {
+func GetHomeworkIdFromRequest(r *http.Request) (uint, error) {
 	homeworkId, err := strconv.Atoi(chi.URLParam(r, "homework_id"))
-	if err != nil {
-		http.Error(w, "You must send homeworkId as URL part like /groups/{group_id}/lessons/{lesson_id}/homeworks/{homework_id}", http.StatusBadRequest)
-		return 0, err
-	}
-	return uint(homeworkId), nil
+	return uint(homeworkId), err
+}
+
+func GetStudentIdFromContext(r *http.Request) uint {
+	_, claims, _ := jwtauth.FromContext(r.Context())
+	return uint(claims["id"].(float64))
+}
+
+func GetStudentIdFromRequest(r *http.Request) (uint, error) {
+	studentId, err := strconv.Atoi(chi.URLParam(r, "student_id"))
+	return uint(studentId), err
 }
