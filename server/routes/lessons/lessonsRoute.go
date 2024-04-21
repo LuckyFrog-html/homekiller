@@ -26,7 +26,12 @@ func AddLesson(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc 
 			return
 		}
 
-		lesson := storage.AddLesson(lessonData.Date, group.ID)
+		lesson, err := storage.AddLesson(lessonData.Date, group.ID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		if err = json.NewEncoder(w).Encode(lesson); err != nil {
 			logger.Error("Can't marshall lesson json", sl.Err(err))

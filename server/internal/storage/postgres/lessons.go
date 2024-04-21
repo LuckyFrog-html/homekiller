@@ -5,15 +5,15 @@ import (
 	"time"
 )
 
-func (s *Storage) AddLesson(date time.Time, groupId uint) *models.Lesson {
+func (s *Storage) AddLesson(date time.Time, groupId uint) (*models.Lesson, error) {
 	tx := s.Db.Begin()
 	lesson := models.Lesson{
 		Date:    date,
 		GroupID: groupId,
 	}
-	tx.Create(&lesson)
+	result := tx.Create(&lesson)
 	tx.Commit()
-	return &lesson
+	return &lesson, result.Error
 }
 
 func (s *Storage) GetLessonById(lessonId uint) (*models.Lesson, error) {

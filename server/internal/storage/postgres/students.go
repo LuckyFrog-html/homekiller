@@ -7,10 +7,10 @@ import (
 )
 
 func (s *Storage) GetAllStudents() error {
-
+	tx := s.Db.Begin()
 	var student models.Student
 
-	students := s.Db.Table("students").First(&student)
+	students := tx.Table("students").First(&student)
 
 	print(students)
 
@@ -18,19 +18,17 @@ func (s *Storage) GetAllStudents() error {
 }
 
 func (s *Storage) GetStudentByID(id uint) (*models.Student, error) {
+	tx := s.Db.Begin()
 	var student models.Student
 
-	result := s.Db.Raw("SELECT * FROM students WHERE id = ? LIMIT 1;", id).Scan(&student)
+	result := tx.Raw("SELECT * FROM students WHERE id = ? LIMIT 1;", id).Scan(&student)
 
-	if result.Error != nil {
-		return nil, result.Error
-	}
-
-	return &student, nil
+	return &student, result.Error
 }
 
-func (s *Storage) AddStudent(name string, stage int64, login, password string) models.Student {
-	bytes, _ := bcrypt.GenerateFromPassword([]byte(password), 14)
+func (s *Storage) AddStudent(name string, stage int64, login, password string) (*models.Student, error) {
+	bytes, _ := bcrypt.GenerateFromPassword([]byte(password), 8)
+	tx := s.Db.Begin()
 
 	student := models.Student{
 		Name:     name,
@@ -39,10 +37,10 @@ func (s *Storage) AddStudent(name string, stage int64, login, password string) m
 		Password: string(bytes),
 	}
 
-	s.Db.Create(&student)
-	s.Db.Commit()
+	result := tx.Create(&student)
+	tx.Commit()
 
-	return student
+	return &student, result.Error
 }
 
 func (s *Storage) GetStudentByLogin(login, password string) (models.Student, error) {
@@ -65,8 +63,9 @@ func (s *Storage) GetStudentByLogin(login, password string) (models.Student, err
 
 func (s *Storage) GetStudentsByGroup(groupId uint) ([]*models.Student, error) {
 	var group models.Group
+	tx := s.Db.Begin()
 
-	result := s.Db.Preload("Students").First(&group, groupId)
+	result := tx.Model(&group).Preload("Students").First(&group, groupId)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -75,10 +74,11 @@ func (s *Storage) GetStudentsByGroup(groupId uint) ([]*models.Student, error) {
 }
 
 func (s *Storage) MarkStudentAttendance(studentsIds []uint, lessonId uint) {
+	tx := s.Db.Begin()
 	for _, studentId := range studentsIds {
 		studentToLesson := models.StudentsToLessons{StudentID: studentId, LessonID: lessonId}
 
-		s.Db.Create(&studentToLesson)
+		tx.Create(&studentToLesson)
 	}
-	s.Db.Commit()
+	tx.Commit()
 }

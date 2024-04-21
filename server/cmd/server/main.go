@@ -27,7 +27,13 @@ func main() {
 
 func Start() {
 	dir, _ := os.Getwd()
-	configPath := path.Join(dir, "config", "local.yaml")
+	var configName string
+	if tempPath := os.Getenv("CONFIG_PATH"); tempPath == "" {
+		configName = "local.yaml"
+	} else {
+		configName = tempPath
+	}
+	configPath := path.Join(dir, "config", configName)
 	cfg := config.MustLoad(configPath)
 	log := sl.SetupLogger(cfg.Env)
 

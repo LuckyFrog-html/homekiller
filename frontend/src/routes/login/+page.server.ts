@@ -1,14 +1,21 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
-import { superValidate } from "sveltekit-superforms";
+import { setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { formSchema } from "./schema";
+import { api } from "$lib/utils";
 
 export const load: PageServerLoad = async () => {
     return {
         form: await superValidate(zod(formSchema)),
     };
 };
+
+const MONTH = 1000 * 60 * 60 * 24 * 30;
+
+type tokenResponse = {
+    token: string;
+}
 
 export const actions: Actions = {
     default: async (event) => {
@@ -19,28 +26,26 @@ export const actions: Actions = {
             });
         }
 
-        console.log(form.data.username)
-        console.log(form.data.password)
-        const response = await fetch('http://localhost:8080/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                login: form.data.username,
-                password: form.data.password
-            }),
-        });
-        console.log(response);
-        if (response.status === 401) {
-            return fail(401, {
-                form,
-            });
+        const response = await api.post<tokenResponse>('/login', {
+            login: form.data.login,
+            password: form.data.password
+        })
+
+        if (response.type === "error" && response.status === 401) {
+            return setError(form, 'login', 'Неверный логин или пароль');
         }
+
+        if (response.type === "networkerror" || response.type === "error") {
+            return setError(form, 'login', 'Неизвестная ошибка, попробуйте снова');
+        }
+
+
+        event.cookies.set("token", response.data.token, { path: '/', expires: new Date(Date.now() + MONTH) });
 
         return {
             form,
         };
+
     },
 };
 

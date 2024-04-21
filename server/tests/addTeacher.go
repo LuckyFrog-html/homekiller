@@ -20,5 +20,8 @@ func main() {
 		panic("Database is not connected!")
 	}
 
-	storage.AddTeacher("Артём", "artmexbet", "1234")
+	_, err = storage.AddTeacher("Андрей", "andrew", "1234")
+	if err != nil {
+		fmt.Println(err)
+	}
 }

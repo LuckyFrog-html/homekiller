@@ -20,7 +20,11 @@ func AddStudentHandler(logger *slog.Logger, storage *postgres.Storage) http.Hand
 			return
 		}
 
-		student := storage.AddStudent(studentData.Name, studentData.Stage, studentData.Login, studentData.Password)
+		student, err := storage.AddStudent(studentData.Name, studentData.Stage, studentData.Login, studentData.Password)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(student); err != nil {
 			logger.Error("Can't marshall student json", sl.Err(err))

@@ -25,7 +25,11 @@ func AddGroup(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
 			return
 		}
 
-		group := storage.AddGroup(groupData.Title, uint(claims["id"].(float64)))
+		group, err := storage.AddGroup(groupData.Title, uint(claims["id"].(float64)))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(group); err != nil {
@@ -65,7 +69,11 @@ func AddStudentsToGroup(logger *slog.Logger, storage *postgres.Storage) http.Han
 			return
 		}
 
-		storage.AddStudentsToGroup(uint(groupId), groupData.StudentsIds)
+		err = storage.AddStudentsToGroup(uint(groupId), groupData.StudentsIds)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(map[string]interface{}{"status": "added"}); err != nil {

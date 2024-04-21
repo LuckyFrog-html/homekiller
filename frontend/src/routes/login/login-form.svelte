@@ -19,17 +19,17 @@
 </script>
 
 <form method="POST" use:enhance>
-    <Form.Field {form} name="username">
+    <Form.Field {form} name="login">
         <Form.Control let:attrs>
             <Form.Label>Логин</Form.Label>
-            <Input {...attrs} bind:value={$formData.username} />
+            <Input {...attrs} bind:value={$formData.login} />
         </Form.Control>
         <Form.FieldErrors />
     </Form.Field>
     <Form.Field {form} name="password">
         <Form.Control let:attrs>
             <Form.Label>Пароль</Form.Label>
-            <Input {...attrs} bind:value={$formData.password} />
+            <Input {...attrs} bind:value={$formData.password} type="password" />
         </Form.Control>
         <Form.FieldErrors />
     </Form.Field>

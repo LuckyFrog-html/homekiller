@@ -5,14 +5,14 @@ import (
 	"time"
 )
 
-func (s *Storage) AddGroup(title string, teacherId uint) models.Group {
+func (s *Storage) AddGroup(title string, teacherId uint) (models.Group, error) {
 	tx := s.Db.Begin()
 	group := models.Group{Title: title, TeacherID: teacherId, IsActive: true}
 
-	tx.Create(&group)
+	result := tx.Create(&group)
 	tx.Commit()
 
-	return group
+	return group, result.Error
 }
 
 func (s *Storage) GetGroupById(id uint) (models.Group, error) {
@@ -27,7 +27,7 @@ func (s *Storage) GetGroupById(id uint) (models.Group, error) {
 	return group, nil
 }
 
-func (s *Storage) AddStudentsToGroup(groupId uint, studentsIds []uint) {
+func (s *Storage) AddStudentsToGroup(groupId uint, studentsIds []uint) error {
 	tx := s.Db.Begin()
 	for _, studentId := range studentsIds {
 		studentToGroup := models.StudentsToGroups{StudentID: studentId, GroupID: groupId, AppendDate: time.Now()}
@@ -35,6 +35,7 @@ func (s *Storage) AddStudentsToGroup(groupId uint, studentsIds []uint) {
 		tx.Create(&studentToGroup)
 	}
 	tx.Commit()
+	return tx.Error
 }
 
 func (s *Storage) IsStudentInGroup(groupId, studentId uint) bool {

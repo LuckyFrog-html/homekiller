@@ -42,7 +42,12 @@ func AddHomework(logger *slog.Logger, storage *postgres.Storage) http.HandlerFun
 			return
 		}
 
-		homework := storage.AddHomework(homeworkData.Description, lesson.ID, homeworkData.Deadline, homeworkData.MaxScore)
+		homework, err := storage.AddHomework(homeworkData.Description, lesson.ID, homeworkData.Deadline, homeworkData.MaxScore)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(homework); err != nil {
 			logger.Error("Can't marshall homework json", sl.Err(err))
@@ -102,8 +107,13 @@ func AddHomeworkFiles(logger *slog.Logger, storage *postgres.Storage) http.Handl
 
 			filePaths = append(filePaths, filePath)
 		}
+		err = storage.AddHomeworkFiles(homeworkId, filePaths)
+		if err != nil {
+			http.Error(w, "Can't add files", http.StatusInternalServerError)
+			logger.Error("Can't add files", sl.Err(err))
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
-		storage.AddHomeworkFiles(homeworkId, filePaths)
 		if err = json.NewEncoder(w).Encode(map[string]interface{}{"added_files": filePaths}); err != nil {
 			logger.Error("Can't marshall added files json", sl.Err(err))
 		}
@@ -120,7 +130,7 @@ func GetHomeworksByStudent(logger *slog.Logger, storage *postgres.Storage) http.
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(homeworks); err != nil {
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{"homeworks": homeworks}); err != nil {
 			logger.Error("Can't marshall homeworks json", sl.Err(err))
 		}
 	}
@@ -140,7 +150,7 @@ func GetHomeworksByStudentIdInRequest(logger *slog.Logger, storage *postgres.Sto
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(homeworks); err != nil {
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{"homeworks": homeworks}); err != nil {
 			logger.Error("Can't marshall homeworks json", sl.Err(err))
 		}
 	}
