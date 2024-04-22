@@ -3,7 +3,7 @@ import { fail } from "@sveltejs/kit";
 import { setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { formSchema } from "./schema";
-import { api } from "$lib/utils";
+import { api } from "$lib/api";
 
 export const load: PageServerLoad = async () => {
     return {
@@ -38,7 +38,6 @@ export const actions: Actions = {
         if (response.type === "networkerror" || response.type === "error") {
             return setError(form, 'login', 'Неизвестная ошибка, попробуйте снова');
         }
-
 
         event.cookies.set("token", response.data.token, { path: '/', expires: new Date(Date.now() + MONTH) });
 
