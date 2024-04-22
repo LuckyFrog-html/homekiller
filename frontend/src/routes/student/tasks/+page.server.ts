@@ -2,17 +2,31 @@ import { api } from "$lib/api";
 import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 
+type Task = {
+    ID: number,
+    CreatedAt: string,
+    UpdatedAt: string,
+    DeletedAt: string,
+    Description: string,
+    LessonID: number,
+    Deadline: string,
+    MaxScore: number,
+    HomeworkFiles: any,
+    HomeworkAnswers: any,
+    Lesson: any,
+    IsDone: boolean,
+    GroupId: number,
+    GroupTitle: string,
+}
+
 /** @type {PageServerLoad} */
-export async function load({ cookies }: Parameters<PageServerLoad>[0]): Promise<ReturnType<PageServerLoad>> {
+export async function load({ cookies }: Parameters<PageServerLoad>[0]): Promise<{ tasks: Task[] }> {
     const token = cookies.get('token');
     const req = await api.get<any>('/homeworks', { token });
 
-
-    console.log(req);
     if (req.type === "success") {
-        return {
-            tasks: req.data || []
-        }
+        const tasks = req.data.homeworks as Task[] || [];
+        return { tasks };
     }
 
 
