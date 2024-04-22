@@ -8,6 +8,7 @@ import (
 
 func (s *Storage) GetTeacher(login, password string) (models.Teacher, error) {
 	tx := s.Db.Begin()
+	defer tx.Commit()
 	var teacher models.Teacher
 
 	result := tx.Preload("Subjects").Preload("Groups").First(&teacher, "login = ?", login)
@@ -25,6 +26,7 @@ func (s *Storage) GetTeacher(login, password string) (models.Teacher, error) {
 
 func (s *Storage) GetTeacherById(id int) (models.Teacher, error) {
 	tx := s.Db.Begin()
+	defer tx.Commit()
 	var teacher models.Teacher
 
 	result := tx.First(&teacher, id)

@@ -8,6 +8,7 @@ import (
 
 func (s *Storage) GetAllStudents() error {
 	tx := s.Db.Begin()
+	defer tx.Commit()
 	var student models.Student
 
 	students := tx.Table("students").First(&student)
@@ -19,6 +20,7 @@ func (s *Storage) GetAllStudents() error {
 
 func (s *Storage) GetStudentByID(id uint) (*models.Student, error) {
 	tx := s.Db.Begin()
+	defer tx.Commit()
 	var student models.Student
 
 	result := tx.Raw("SELECT * FROM students WHERE id = ? LIMIT 1;", id).Scan(&student)
@@ -29,6 +31,7 @@ func (s *Storage) GetStudentByID(id uint) (*models.Student, error) {
 func (s *Storage) AddStudent(name string, stage int64, login, password string) (*models.Student, error) {
 	bytes, _ := bcrypt.GenerateFromPassword([]byte(password), 8)
 	tx := s.Db.Begin()
+	defer tx.Commit()
 
 	student := models.Student{
 		Name:     name,
@@ -45,6 +48,7 @@ func (s *Storage) AddStudent(name string, stage int64, login, password string) (
 
 func (s *Storage) GetStudentByLogin(login, password string) (models.Student, error) {
 	tx := s.Db.Begin()
+	defer tx.Commit()
 	var student models.Student
 	tmp := tx.Preload("Lessons").Preload("Groups").Preload("HomeworksAnswers")
 	//result := tmp.Raw("SELECT * FROM students WHERE login = ? LIMIT 1;", login).Scan(&student)
@@ -64,6 +68,7 @@ func (s *Storage) GetStudentByLogin(login, password string) (models.Student, err
 func (s *Storage) GetStudentsByGroup(groupId uint) ([]*models.Student, error) {
 	var group models.Group
 	tx := s.Db.Begin()
+	defer tx.Commit()
 
 	result := tx.Model(&group).Preload("Students").First(&group, groupId)
 	if result.Error != nil {
@@ -75,6 +80,7 @@ func (s *Storage) GetStudentsByGroup(groupId uint) ([]*models.Student, error) {
 
 func (s *Storage) MarkStudentAttendance(studentsIds []uint, lessonId uint) {
 	tx := s.Db.Begin()
+	defer tx.Commit()
 	for _, studentId := range studentsIds {
 		studentToLesson := models.StudentsToLessons{StudentID: studentId, LessonID: lessonId}
 

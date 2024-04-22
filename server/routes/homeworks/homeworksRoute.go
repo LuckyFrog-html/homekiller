@@ -11,6 +11,7 @@ import (
 	"server/internal/http_server/permissions"
 	"server/internal/lib/logger/sl"
 	"server/internal/storage/postgres"
+	"strings"
 )
 
 func GetHomeworks(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
@@ -75,7 +76,7 @@ func AddHomeworkFiles(logger *slog.Logger, storage *postgres.Storage) http.Handl
 
 		err = r.ParseMultipartForm(10 << 20)
 		if err != nil {
-			http.Error(w, "Can't parse form", http.StatusBadRequest)
+			http.Error(w, "Can't parse form: "+err.Error(), http.StatusBadRequest)
 			logger.Error("Can't parse form", sl.Err(err))
 			return
 		}
@@ -85,7 +86,14 @@ func AddHomeworkFiles(logger *slog.Logger, storage *postgres.Storage) http.Handl
 
 		filePaths := make([]string, 0, len(files))
 		for _, file := range files {
-			filePath := fmt.Sprintf("files/%s", file.Filename)
+			fileId, err := storage.AddHomeworkFile(homeworkId, file.Filename)
+			if err != nil {
+				http.Error(w, "Can't add file", http.StatusInternalServerError)
+				logger.Error("Can't add file", sl.Err(err))
+				return
+			}
+			splitted := strings.Split(file.Filename, ".")
+			filePath := fmt.Sprintf("files/%d.%s", fileId, splitted[len(splitted)-1])
 			f, err := file.Open()
 			if err != nil {
 				http.Error(w, fmt.Sprintf("Can't open file %s", file.Filename), http.StatusBadRequest)
@@ -106,12 +114,6 @@ func AddHomeworkFiles(logger *slog.Logger, storage *postgres.Storage) http.Handl
 			}
 
 			filePaths = append(filePaths, filePath)
-		}
-		err = storage.AddHomeworkFiles(homeworkId, filePaths)
-		if err != nil {
-			http.Error(w, "Can't add files", http.StatusInternalServerError)
-			logger.Error("Can't add files", sl.Err(err))
-			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		if err = json.NewEncoder(w).Encode(map[string]interface{}{"added_files": filePaths}); err != nil {

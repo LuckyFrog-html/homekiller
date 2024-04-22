@@ -7,6 +7,7 @@ import (
 
 func (s *Storage) AddGroup(title string, teacherId uint) (models.Group, error) {
 	tx := s.Db.Begin()
+	defer tx.Commit()
 	group := models.Group{Title: title, TeacherID: teacherId, IsActive: true}
 
 	result := tx.Create(&group)
@@ -17,6 +18,7 @@ func (s *Storage) AddGroup(title string, teacherId uint) (models.Group, error) {
 
 func (s *Storage) GetGroupById(id uint) (models.Group, error) {
 	tx := s.Db.Begin()
+	defer tx.Commit()
 	var group models.Group
 
 	result := tx.Preload("Students").First(&group, "id=?", id)
@@ -29,6 +31,7 @@ func (s *Storage) GetGroupById(id uint) (models.Group, error) {
 
 func (s *Storage) AddStudentsToGroup(groupId uint, studentsIds []uint) error {
 	tx := s.Db.Begin()
+	defer tx.Commit()
 	for _, studentId := range studentsIds {
 		studentToGroup := models.StudentsToGroups{StudentID: studentId, GroupID: groupId, AppendDate: time.Now()}
 
@@ -40,6 +43,7 @@ func (s *Storage) AddStudentsToGroup(groupId uint, studentsIds []uint) error {
 
 func (s *Storage) IsStudentInGroup(groupId, studentId uint) bool {
 	tx := s.Db.Begin()
+	defer tx.Commit()
 	var studentToGroup models.StudentsToGroups
 
 	result := tx.First(&studentToGroup, "group_id = ? AND student_id = ?", groupId, studentId)
@@ -49,6 +53,7 @@ func (s *Storage) IsStudentInGroup(groupId, studentId uint) bool {
 
 func (s *Storage) GetGroupsByStudent(studentId uint) ([]*models.Group, error) {
 	tx := s.Db.Begin()
+	defer tx.Commit()
 	var student models.Student
 	result := tx.Preload("Groups").First(&student, studentId)
 

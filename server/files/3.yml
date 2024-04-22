@@ -1,0 +1,31 @@
+version: '3'
+services:
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - CONFIG_PATH=docker.yaml
+    volumes:
+      - ./server/files:/root/files
+  db:
+    container_name: "db"
+    image: postgres
+    environment:
+      POSTGRES_USER: gorm
+      POSTGRES_PASSWORD: gorm
+      POSTGRES_DB: main
+    restart: unless-stopped
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    ports:
+      - "8000:5432"
+networks:
+  app-network:
+    driver: bridge
