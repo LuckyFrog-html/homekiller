@@ -79,17 +79,17 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 
 		r.Post("/students", students.AddStudentHandler(log, storage))
 		r.Post("/groups", groups.AddGroup(log, storage))
-		//r.Get("/teacher/groups", groups.GetGroupsByTeacher(log, storage))
-		r.Post("/groups/{group_id}/students", groups.AddStudentsToGroup(log, storage))
+		r.Get("/teacher/groups", groups.GetGroupsByTeacher(log, storage))
+		r.Post("/students", groups.AddStudentsToGroup(log, storage))
 		r.Get("/groups/{group_id}/students", groups.GetStudentsFromGroup(log, storage))
 
-		r.Post("/groups/{group_id}/lessons", lessons.AddLesson(log, storage))
-		r.Post("/groups/{group_id}/lessons/{lesson_id}", lessons.MarkStudentAttendance(log, storage)) // TODO: Дописать геттер для списка отмеченных учеников
+		r.Post("/lessons", lessons.AddLesson(log, storage))
+		r.Post("/lessons/{lesson_id}", lessons.MarkStudentAttendance(log, storage)) // TODO: Дописать геттер для списка отмеченных учеников
 
-		r.Post("/groups/{group_id}/lessons/{lesson_id}/homeworks", homeworks.AddHomework(log, storage)) // TODO: Геттер для домашек урока
-		// TODO: Геттер для конкретной домашки (со списком решений школьников, названием и прочим)
+		r.Post("/homeworks", homeworks.AddHomework(log, storage))
+		r.Get("/solves", homeworks.GetHomeworkSolvesByTeacher(log, storage))
 		// TODO: Геттер для конкретного решения
-		r.Post("/groups/{group_id}/lessons/{lesson_id}/homeworks/{homework_id}/files", homeworks.AddHomeworkFiles(log, storage))
+		r.Post("/homeworks/{homework_id}/files", homeworks.AddHomeworkFiles(log, storage))
 		r.Get("/students/{student_id}/homeworks", homeworks.GetHomeworksByStudentIdInRequest(log, storage))
 		// TODO: Геттер для файлов
 		// TODO: DELETE для студента
@@ -110,6 +110,7 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 		//r.Get("/groups", groups.GetGroupsByStudentHandler(log, storage))
 		r.Get("/homeworks", homeworks.GetHomeworksByStudent(log, storage))
 		r.Get("/homeworks/{homework_id}", homeworks.GetHomeworkById(log, storage))
+		r.Post("/homeworks", homeworks.AddHomeworkAnswer(log, storage))
 		// TODO: Добавление ответов студентов на домашку
 		// TODO: Геттер для конкретного решения
 		// TODO: DELETE для ответов на домашку

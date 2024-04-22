@@ -72,3 +72,13 @@ func (s *Storage) GetGroupsByTeacher(teacherId uint) ([]*models.Group, error) {
 
 	return teacher.Groups, result.Error
 }
+
+func (s *Storage) IsTeacherInGroup(groupId, teacherId uint) bool {
+	tx := s.Db.Begin()
+	defer tx.Commit()
+	var group models.Group
+
+	result := tx.First(&group, "id = ? AND teacher_id = ?", groupId, teacherId)
+
+	return result.Error == nil
+}

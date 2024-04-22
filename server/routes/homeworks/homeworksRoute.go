@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"server/internal/http_server/middlewares"
 	communicationJson "server/internal/http_server/network/communication/json"
 	"server/internal/http_server/permissions"
 	"server/internal/lib/logger/sl"
@@ -31,15 +32,29 @@ func GetHomeworks(logger *slog.Logger, storage *postgres.Storage) http.HandlerFu
 
 func AddHomework(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lesson, done := permissions.ValidateTeachersPermissionInLesson(w, r, logger, storage)
-		if done {
-			return
-		}
-
 		var homeworkData communicationJson.HomeworkJson
 		if err := json.NewDecoder(r.Body).Decode(&homeworkData); err != nil {
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 			logger.Error("Can't unmarshal JSON", sl.Err(err))
+			return
+		}
+
+		lesson, err := storage.GetLessonById(homeworkData.LessonId)
+		if err != nil {
+			http.Error(w, "Can't get lesson", http.StatusNotFound)
+			logger.Error("Can't get lesson", sl.Err(err))
+			return
+		}
+
+		teacherId, err := middlewares.GetTeacherIdFromContext(r.Context())
+		if err != nil {
+			http.Error(w, "Can't get teacherId", http.StatusNotFound)
+			logger.Error("Can't get teacherId", sl.Err(err))
+			return
+		}
+
+		if !storage.IsTeacherInGroup(lesson.GroupID, teacherId) {
+			http.Error(w, "Teacher is not owner of this group", http.StatusForbidden)
 			return
 		}
 
@@ -58,14 +73,27 @@ func AddHomework(logger *slog.Logger, storage *postgres.Storage) http.HandlerFun
 
 func AddHomeworkFiles(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lesson, done := permissions.ValidateTeachersPermissionInLesson(w, r, logger, storage)
-		if done {
+		homeworkId, err := permissions.GetHomeworkIdFromRequest(r)
+		if err != nil {
+			http.Error(w, "You must send homeworkId as URL part like /homeworks/{homework_id}/files", http.StatusBadRequest)
 			return
 		}
 
-		homeworkId, err := permissions.GetHomeworkIdFromRequest(r)
+		teacherId, err := middlewares.GetTeacherIdFromContext(r.Context())
 		if err != nil {
-			http.Error(w, "You must send homeworkId as URL part like /groups/{group_id}/lessons/{lesson_id}/homeworks/{homework_id}", http.StatusBadRequest)
+			http.Error(w, "Can't get teacherId", http.StatusNotFound)
+			logger.Error("Can't get teacherId", sl.Err(err))
+			return
+		}
+
+		lesson, err := storage.GetLessonByHomeworkId(homeworkId)
+		if err != nil {
+			http.Error(w, "Can't get lesson", http.StatusNotFound)
+			logger.Error("Can't get lesson", sl.Err(err))
+			return
+		}
+		if lesson.Group.TeacherID != teacherId {
+			http.Error(w, "Teacher is not owner of this group", http.StatusForbidden)
 			return
 		}
 
@@ -92,6 +120,7 @@ func AddHomeworkFiles(logger *slog.Logger, storage *postgres.Storage) http.Handl
 				logger.Error("Can't add file", sl.Err(err))
 				return
 			}
+
 			splitted := strings.Split(file.Filename, ".")
 			filePath := fmt.Sprintf("files/%d.%s", fileId, splitted[len(splitted)-1])
 			f, err := file.Open()
@@ -100,6 +129,7 @@ func AddHomeworkFiles(logger *slog.Logger, storage *postgres.Storage) http.Handl
 				return
 			}
 			defer f.Close()
+
 			dst, err := os.Create(filePath)
 			if err != nil {
 				http.Error(w, "Can't create file", http.StatusInternalServerError)
@@ -107,6 +137,7 @@ func AddHomeworkFiles(logger *slog.Logger, storage *postgres.Storage) http.Handl
 				return
 			}
 			defer dst.Close()
+
 			if _, err = io.Copy(dst, f); err != nil {
 				http.Error(w, fmt.Sprintf("Can't copy file %s", file.Filename), http.StatusBadRequest)
 				logger.Error("Can't copy file", sl.Err(err))
@@ -115,6 +146,7 @@ func AddHomeworkFiles(logger *slog.Logger, storage *postgres.Storage) http.Handl
 
 			filePaths = append(filePaths, filePath)
 		}
+
 		w.Header().Set("Content-Type", "application/json")
 		if err = json.NewEncoder(w).Encode(map[string]interface{}{"added_files": filePaths}); err != nil {
 			logger.Error("Can't marshall added files json", sl.Err(err))
@@ -180,6 +212,62 @@ func GetHomeworkById(logger *slog.Logger, storage *postgres.Storage) http.Handle
 		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(homework); err != nil {
 			logger.Error("Can't marshall homework json", sl.Err(err))
+		}
+	}
+}
+
+func AddHomeworkAnswer(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var answerData communicationJson.HomeworkAnswerJson
+		if err := json.NewDecoder(r.Body).Decode(&answerData); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			logger.Error("Can't unmarshal JSON", sl.Err(err))
+			return
+		}
+
+		homework, err := storage.GetHomeworkById(answerData.HomeworkId)
+		if err != nil {
+			http.Error(w, "Can't get homework", http.StatusNotFound)
+			logger.Error("Can't get homework", sl.Err(err))
+			return
+		}
+		studentId := permissions.GetStudentIdFromContext(r)
+		if !storage.IsStudentInGroup(homework.Lesson.GroupID, studentId) {
+			http.Error(w, "Student is not in this group", http.StatusForbidden)
+			return
+		}
+
+		err = storage.AddHomeworkAnswer(answerData.HomeworkId, studentId, answerData.Text)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{"status": "added"}); err != nil {
+			logger.Error("Can't marshall student json", sl.Err(err))
+		}
+	}
+}
+
+func GetHomeworkSolvesByTeacher(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		teacherId, err := middlewares.GetTeacherIdFromContext(r.Context())
+		if err != nil {
+			http.Error(w, "Can't get teacherId", http.StatusNotFound)
+			logger.Error("Can't get teacherId", sl.Err(err))
+			return
+		}
+
+		homeworkSolves, err := storage.GetHomeworkSolvesByTeacher(teacherId)
+		if err != nil {
+			http.Error(w, "Can't get homework answers", http.StatusForbidden)
+			logger.Error("Can't get homework answers", sl.Err(err))
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{"solves": homeworkSolves}); err != nil {
+			logger.Error("Can't marshall homeworks json", sl.Err(err))
 		}
 	}
 }

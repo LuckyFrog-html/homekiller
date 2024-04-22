@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"server/internal/http_server/middlewares"
 	communicationJson "server/internal/http_server/network/communication/json"
 	"server/internal/http_server/permissions"
 	"server/internal/lib/logger/sl"
@@ -14,11 +15,6 @@ import (
 
 func AddLesson(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		group, err := permissions.ValidateTeacherGroup(logger, storage, w, r)
-		if err != nil {
-			return
-		}
-
 		var lessonData communicationJson.AddLessonJson
 		if err := json.NewDecoder(r.Body).Decode(&lessonData); err != nil {
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
@@ -26,7 +22,20 @@ func AddLesson(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc 
 			return
 		}
 
-		lesson, err := storage.AddLesson(lessonData.Date, group.ID)
+		teacherId, err := middlewares.GetTeacherIdFromContext(r.Context())
+		if err != nil {
+			http.Error(w, "Can't get teacherId", http.StatusNotFound)
+			logger.Error("Can't get teacherId", sl.Err(err))
+			return
+
+		}
+
+		if !storage.IsTeacherInGroup(lessonData.GroupId, teacherId) {
+			http.Error(w, "Teacher is not owner of this group", http.StatusForbidden)
+			return
+		}
+
+		lesson, err := storage.AddLesson(lessonData.Date, lessonData.GroupId)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -70,15 +79,24 @@ func GetLessonByGroup(logger *slog.Logger, storage *postgres.Storage) http.Handl
 
 func MarkStudentAttendance(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lesson, done := permissions.ValidatePermissionsInLesson(w, r, logger, storage)
-		if done {
-			return
-		}
-
 		var attendanceData communicationJson.MarkStudentAttendanceJson
+
 		if err := json.NewDecoder(r.Body).Decode(&attendanceData); err != nil {
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 			logger.Error("Can't unmarshal JSON", sl.Err(err))
+			return
+		}
+
+		teacherId, err := middlewares.GetTeacherIdFromContext(r.Context())
+		if err != nil {
+			http.Error(w, "Can't get teacherId", http.StatusNotFound)
+			logger.Error("Can't get teacherId", sl.Err(err))
+			return
+		}
+
+		lesson, err := storage.GetLessonById(attendanceData.LessonID)
+		if lesson.Group.TeacherID != teacherId {
+			http.Error(w, "Teacher is not owner of this group", http.StatusForbidden)
 			return
 		}
 

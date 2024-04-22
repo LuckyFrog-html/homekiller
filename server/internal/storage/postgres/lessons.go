@@ -28,3 +28,15 @@ func (s *Storage) GetLessonById(lessonId uint) (*models.Lesson, error) {
 	}
 	return &lesson, nil
 }
+
+func (s *Storage) GetLessonByHomeworkId(homeworkId uint) (*models.Lesson, error) {
+	var lesson models.Lesson
+
+	tx := s.Db.Begin()
+	defer tx.Commit()
+	result := tx.Preload("Group").Preload("Homeworks").Preload("Students").Joins("JOIN homeworks ON homeworks.lesson_id = lessons.id").First(&lesson, "homeworks.id=?", homeworkId)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &lesson, nil
+}

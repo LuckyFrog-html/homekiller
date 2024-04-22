@@ -2,7 +2,6 @@ package groups
 
 import (
 	"encoding/json"
-	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth"
 	"log/slog"
 	"net/http"
@@ -11,7 +10,6 @@ import (
 	"server/internal/http_server/permissions"
 	"server/internal/lib/logger/sl"
 	"server/internal/storage/postgres"
-	"strconv"
 )
 
 func AddGroup(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
@@ -41,28 +39,14 @@ func AddGroup(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
 
 func AddStudentsToGroup(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, claims, err := jwtauth.FromContext(r.Context())
+		teacherId, err := middlewares.GetTeacherIdFromContext(r.Context())
+		if err != nil {
+			http.Error(w, "Can't get teacher id", http.StatusInternalServerError)
+			logger.Error("Can't get teacher id", sl.Err(err))
+			return
+		}
 
 		var groupData communicationJson.AddStudentToGroupJson
-
-		groupId, err := strconv.Atoi(chi.URLParam(r, "group_id"))
-
-		if err != nil {
-			http.Error(w, "You must send groupId as URL part like /groups/{group_id}/students", http.StatusBadRequest)
-			logger.Error("Can't parse groupId", sl.Err(err))
-			return
-		}
-
-		group, err := storage.GetGroupById(uint(groupId))
-		if err != nil {
-			http.Error(w, "Group not found", http.StatusNotFound)
-			return
-		}
-
-		if group.TeacherID != uint(claims["id"].(float64)) {
-			http.Error(w, "You are not the owner of this group", http.StatusForbidden)
-			return
-		}
 
 		if err := json.NewDecoder(r.Body).Decode(&groupData); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -70,7 +54,12 @@ func AddStudentsToGroup(logger *slog.Logger, storage *postgres.Storage) http.Han
 			return
 		}
 
-		err = storage.AddStudentsToGroup(uint(groupId), groupData.StudentsIds)
+		if !storage.IsTeacherInGroup(groupData.GroupId, teacherId) {
+			http.Error(w, "Teacher is not owner of this group", http.StatusForbidden)
+			return
+		}
+
+		err = storage.AddStudentsToGroup(groupData.GroupId, groupData.StudentsIds)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

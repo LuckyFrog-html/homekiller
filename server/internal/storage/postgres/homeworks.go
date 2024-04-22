@@ -66,6 +66,26 @@ func (s *Storage) GetHomeworkById(id uint) (models.Homework, error) {
 	tx := s.Db.Begin()
 	defer tx.Commit()
 	var homework models.Homework
-	result := tx.Preload("Lesson").First(&homework, id)
+	result := tx.Preload("Lesson").Preload("HomeworkFiles").First(&homework, id)
 	return homework, result.Error
+}
+
+func (s *Storage) AddHomeworkAnswer(homeworkId, studentId uint, answer string) error {
+	tx := s.Db.Begin()
+	defer tx.Commit()
+	homeworkAnswer := models.HomeworkAnswer{HomeworkID: homeworkId, StudentID: studentId, Text: answer}
+	tx.Create(&homeworkAnswer)
+	return tx.Error
+}
+
+func (s *Storage) GetHomeworkSolvesByTeacher(teacherId uint) ([]models.HomeworkAnswer, error) {
+	tx := s.Db.Begin()
+	defer tx.Commit()
+	var homeworkAnswers []models.HomeworkAnswer
+	result := tx.Preload("Homework").Preload("Student").Preload("HomeworkAnswerFiles").
+		Joins("JOIN homeworks ON homeworks.id = homework_answers.homework_id").
+		Joins("JOIN lessons ON lessons.id = homeworks.lesson_id").
+		Joins("JOIN groups ON groups.id = lessons.group_id").
+		Where("groups.teacher_id = ?", teacherId).Find(&homeworkAnswers)
+	return homeworkAnswers, result.Error
 }
