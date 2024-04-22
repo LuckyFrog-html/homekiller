@@ -63,3 +63,12 @@ func (s *Storage) GetGroupsByStudent(studentId uint) ([]*models.Group, error) {
 
 	return student.Groups, nil
 }
+
+func (s *Storage) GetGroupsByTeacher(teacherId uint) ([]*models.Group, error) {
+	tx := s.Db.Begin()
+	defer tx.Commit()
+	var teacher models.Teacher
+	result := tx.Preload("Groups").First(&teacher, teacherId)
+
+	return teacher.Groups, result.Error
+}

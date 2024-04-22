@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/jwtauth"
 	"log/slog"
 	"net/http"
+	"server/internal/http_server/middlewares"
 	communicationJson "server/internal/http_server/network/communication/json"
 	"server/internal/http_server/permissions"
 	"server/internal/lib/logger/sl"
@@ -109,6 +110,28 @@ func GetGroupsByStudentHandler(logger *slog.Logger, storage *postgres.Storage) h
 
 		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(groups); err != nil {
+			logger.Error("Can't marshall groups json", sl.Err(err))
+		}
+	}
+}
+
+func GetGroupsByTeacher(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		teacherId, err := middlewares.GetTeacherIdFromContext(r.Context())
+		if err != nil {
+			http.Error(w, "Can't get teacher id", http.StatusInternalServerError)
+			logger.Error("Can't get teacher id", sl.Err(err))
+			return
+		}
+
+		groups, err := storage.GetGroupsByTeacher(teacherId)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{"groups": groups}); err != nil {
 			logger.Error("Can't marshall groups json", sl.Err(err))
 		}
 	}

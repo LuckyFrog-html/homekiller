@@ -78,7 +78,8 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 		// Авторизованные запросы для учителей
 
 		r.Post("/students", students.AddStudentHandler(log, storage))
-		r.Post("/groups", groups.AddGroup(log, storage)) // TODO: Дописать геттер списка групп
+		r.Post("/groups", groups.AddGroup(log, storage))
+		//r.Get("/teacher/groups", groups.GetGroupsByTeacher(log, storage))
 		r.Post("/groups/{group_id}/students", groups.AddStudentsToGroup(log, storage))
 		r.Get("/groups/{group_id}/students", groups.GetStudentsFromGroup(log, storage))
 
@@ -103,11 +104,12 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 		r.Use(jwtauth.Authenticator)
 
 		// Авторизованные запросы для студентов
-		r.Get("/groups/{group_id}/lessons", lessons.GetLessons(log, storage))
-		r.Get("/groups/{group_id}/lessons/{lesson_id}", lessons.GetLessonByGroup(log, storage))
-		r.Get("/groups/{group_id}/lessons/{lesson_id}/homeworks", homeworks.GetHomeworks(log, storage))
-		r.Get("/groups", groups.GetGroupsByStudentHandler(log, storage))
+		//r.Get("/groups/{group_id}/lessons", lessons.GetLessons(log, storage))
+		//r.Get("/groups/{group_id}/lessons/{lesson_id}", lessons.GetLessonByGroup(log, storage))
+		//r.Get("/groups/{group_id}/lessons/{lesson_id}/homeworks", homeworks.GetHomeworks(log, storage))
+		//r.Get("/groups", groups.GetGroupsByStudentHandler(log, storage))
 		r.Get("/homeworks", homeworks.GetHomeworksByStudent(log, storage))
+		r.Get("/homeworks/{homework_id}", homeworks.GetHomeworkById(log, storage))
 		// TODO: Добавление ответов студентов на домашку
 		// TODO: Геттер для конкретного решения
 		// TODO: DELETE для ответов на домашку
