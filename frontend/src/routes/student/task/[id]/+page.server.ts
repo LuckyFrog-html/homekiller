@@ -37,7 +37,40 @@ export const actions: Actions = {
             });
         }
 
-        console.log(form.data.answer)
+        const homework_id = event.params.id;
+        const text = form.data.answer;
+        if (text == undefined || homework_id === undefined) {
+            return fail(400, {
+                form,
+            });
+        }
+
+        const token = event.cookies.get('token');
+        const res = await api.post(`/homeworks`, { homework_id: +homework_id, text }, { token });
+
+        if (res.type === 'error' && res.status === 401) {
+            return redirect(303, '/login');
+        }
+
+        if (res.type === "networkerror" || res.type === "error") {
+            return redirect(303, '/login');
+        }
+
+        if (form.data.files.length > 0) {
+            for (const file of form.data.files) {
+                const res = await fetch(api.url + `/files`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': file.type,
+                        'Content-Disposition': `attachment; filename=${file.name}`,
+                    },
+                    body: file,
+                });
+            }
+        }
+
+        form.data.files = [];
 
         return {
             form,
