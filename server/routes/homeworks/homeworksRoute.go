@@ -271,3 +271,102 @@ func GetHomeworkSolvesByTeacher(logger *slog.Logger, storage *postgres.Storage) 
 		}
 	}
 }
+
+func GetHomeworkSolveByTeacher(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		teacherId, err := middlewares.GetTeacherIdFromContext(r.Context())
+		if err != nil {
+			http.Error(w, "Can't get teacherId", http.StatusNotFound)
+			logger.Error("Can't get teacherId", sl.Err(err))
+			return
+		}
+
+		solveId, err := permissions.GetSolveIdFromRequest(r)
+		if err != nil {
+			http.Error(w, "You must send solveId as URL part like /solves/{solve_id}", http.StatusBadRequest)
+			return
+		}
+
+		solve, err := storage.GetHomeworkSolveById(solveId)
+		if err != nil {
+			http.Error(w, "Can't get solve", http.StatusForbidden)
+			logger.Error("Can't get solve", sl.Err(err))
+			return
+		}
+
+		if storage.IsTeacherInSolve(teacherId, solve.ID) {
+			http.Error(w, "Teacher is not owner of homework this solve", http.StatusForbidden)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(solve); err != nil {
+			logger.Error("Can't marshall solve json", sl.Err(err))
+		}
+	}
+}
+
+func AddFiles(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		homeworkId, err := permissions.GetHomeworkIdFromRequest(r)
+		if err != nil {
+			http.Error(w, "You must send homeworkId as URL part like /homeworks/{homework_id}/files", http.StatusBadRequest)
+			return
+		}
+
+		teacherId, err := middlewares.GetTeacherIdFromContext(r.Context())
+		if err != nil {
+			http.Error(w, "Can't get teacherId", http.StatusNotFound)
+			logger.Error("Can't get teacherId", sl.Err(err))
+			return
+		}
+
+		lesson, err := storage.GetLessonByHomeworkId(homeworkId)
+		if err != nil {
+			http.Error(w, "Can't get lesson", http.StatusNotFound)
+			logger.Error("Can't get lesson", sl.Err(err))
+			return
+		}
+		if lesson.Group.TeacherID != teacherId {
+			http.Error(w, "Teacher is not owner of this group", http.StatusForbidden)
+			return
+		}
+
+		if !storage.IsHomeworkInLesson(homeworkId, lesson.ID) {
+			http.Error(w, "Homework not found", http.StatusNotFound)
+			return
+		}
+
+		err = r.ParseMultipartForm(10 << 20)
+		if err != nil {
+			http.Error(w, "Can't parse form: "+err.Error(), http.StatusBadRequest)
+			logger.Error("Can't parse form", sl.Err(err))
+			return
+		}
+
+		form := r.MultipartForm
+		_ = form.File["files"]
+
+		// TODO: Дописать
+		//filePaths := make([]string, 0, len(files))
+		//for _, file := range files {
+		//	fileId, err := storage.AddHomeworkFile(homeworkId, file.Filename)
+		//	if err != nil {
+		//		http.Error(w, "Can't add file", http.StatusInternalServerError)
+		//		logger.Error("Can't add file", sl.Err(err))
+		//		return
+		//	}
+		//
+		//	splitted := strings.Split(file.Filename, ".")
+		//	filePath := fmt.Sprintf("files/%d.%s", fileId, splitted[len(splitted)-1])
+		//	f, err := file.Open()
+		//	if err != nil {
+		//		http.Error(w, fmt.Sprintf("Can't open file %s", file.Filename), http.StatusBadRequest)
+		//		return
+		//	}
+		//	defer f.Close()
+		//
+		//	dst, err := os.Create(filePath)
+		//	if err !=
+	}
+}

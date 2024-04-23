@@ -88,8 +88,7 @@ func GetStudentsFromGroup(logger *slog.Logger, storage *postgres.Storage) http.H
 
 func GetGroupsByStudentHandler(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, claims, _ := jwtauth.FromContext(r.Context())
-		studentId := uint(claims["id"].(float64))
+		studentId := permissions.GetStudentIdFromContext(r)
 
 		groups, err := storage.GetGroupsByStudent(studentId)
 		if err != nil {

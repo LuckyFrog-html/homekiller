@@ -88,10 +88,10 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 
 		r.Post("/homeworks", homeworks.AddHomework(log, storage))
 		r.Get("/solves", homeworks.GetHomeworkSolvesByTeacher(log, storage))
-		// TODO: Геттер для конкретного решения
+		r.Get("/solves/{solve_id}", homeworks.GetHomeworkSolveByTeacher(log, storage))
+
 		r.Post("/homeworks/{homework_id}/files", homeworks.AddHomeworkFiles(log, storage))
 		r.Get("/students/{student_id}/homeworks", homeworks.GetHomeworksByStudentIdInRequest(log, storage))
-		// TODO: Геттер для файлов
 		// TODO: DELETE для студента
 		// TODO: DELETE для группы
 		// TODO: DELETE для прикрепления студента к группе
@@ -104,18 +104,16 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 		r.Use(jwtauth.Authenticator)
 
 		// Авторизованные запросы для студентов
-		//r.Get("/groups/{group_id}/lessons", lessons.GetLessons(log, storage))
-		//r.Get("/groups/{group_id}/lessons/{lesson_id}", lessons.GetLessonByGroup(log, storage))
-		//r.Get("/groups/{group_id}/lessons/{lesson_id}/homeworks", homeworks.GetHomeworks(log, storage))
-		//r.Get("/groups", groups.GetGroupsByStudentHandler(log, storage))
+		r.Get("/lessons", lessons.GetLessons(log, storage))
+		r.Get("/lessons/{lesson_id}", lessons.GetLessonById(log, storage))
+		r.Get("/groups", groups.GetGroupsByStudentHandler(log, storage))
 		r.Get("/homeworks", homeworks.GetHomeworksByStudent(log, storage))
 		r.Get("/homeworks/{homework_id}", homeworks.GetHomeworkById(log, storage))
 		r.Post("/homeworks", homeworks.AddHomeworkAnswer(log, storage))
-		// TODO: Добавление ответов студентов на домашку
-		// TODO: Геттер для конкретного решения
+		r.Post("/files", homeworks.AddFiles(log, storage))
+		// TODO: Добавление файлов к ответу
 		// TODO: DELETE для ответов на домашку
-		// TODO: DELETE для файлов ответа
-		// TODO: самовыпил
+		// TODO: DELETE для файлов ответа на домашку
 	})
 	router.Group(func(r chi.Router) {
 		// Неавторизованные запросы

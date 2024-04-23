@@ -127,3 +127,13 @@ func GetStudentIdFromRequest(r *http.Request) (uint, error) {
 	studentId, err := strconv.Atoi(chi.URLParam(r, "student_id"))
 	return uint(studentId), err
 }
+
+func GetSolveIdFromRequest(r *http.Request) (uint, error) {
+	solveId, err := strconv.Atoi(chi.URLParam(r, "solve_id"))
+	return uint(solveId), err
+}
+
+func GetLessonIdFromRequest(r *http.Request) (uint, error) {
+	lessonId, err := strconv.Atoi(chi.URLParam(r, "lesson_id"))
+	return uint(lessonId), err
+}

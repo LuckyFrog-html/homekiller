@@ -89,3 +89,22 @@ func (s *Storage) GetHomeworkSolvesByTeacher(teacherId uint) ([]models.HomeworkA
 		Where("groups.teacher_id = ?", teacherId).Find(&homeworkAnswers)
 	return homeworkAnswers, result.Error
 }
+
+func (s *Storage) GetHomeworkSolveById(id uint) (models.HomeworkAnswer, error) {
+	tx := s.Db.Begin()
+	defer tx.Commit()
+	var homeworkAnswer models.HomeworkAnswer
+	result := tx.Preload("Homework").Preload("Student").Preload("HomeworkAnswerFiles").First(&homeworkAnswer, id)
+	return homeworkAnswer, result.Error
+}
+
+func (s *Storage) IsTeacherInSolve(teacherId, solveId uint) bool {
+	tx := s.Db.Begin()
+	defer tx.Commit()
+	var homeworkAnswer models.HomeworkAnswer
+	result := tx.Joins("JOIN homeworks ON homeworks.id = homework_answers.homework_id").
+		Joins("JOIN lessons ON lessons.id = homeworks.lesson_id").
+		Joins("JOIN groups ON groups.id = lessons.group_id").
+		First(&homeworkAnswer, "groups.teacher_id = ? AND homework_answers.id = ?", teacherId, solveId)
+	return result.RowsAffected != 0
+}

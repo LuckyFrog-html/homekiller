@@ -50,23 +50,47 @@ func AddLesson(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc 
 
 func GetLessons(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		group, forbidden := permissions.ValidatePermissionsInGroup(w, r, logger, storage)
-		if forbidden {
+		studentId := permissions.GetStudentIdFromContext(r)
+		lessons, err := storage.GetLessonsByStudentId(studentId)
+
+		if err != nil {
+			http.Error(w, "Can't get lessons", http.StatusInternalServerError)
+			logger.Error("Can't get lessons", sl.Err(err))
 			return
 		}
 
-		lessons := group.Lessons
 		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(lessons); err != nil {
+		if err := json.NewEncoder(w).Encode(map[string]any{"lessons": lessons}); err != nil {
 			logger.Error("Can't marshall lessons json", sl.Err(err))
 		}
 	}
 }
 
-func GetLessonByGroup(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
+func GetLessonById(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lesson, done := permissions.ValidatePermissionsInLesson(w, r, logger, storage)
-		if done {
+		studentId := permissions.GetStudentIdFromContext(r)
+		lessonId, err := permissions.GetLessonIdFromRequest(r)
+
+		if err != nil {
+			http.Error(w, "Can't get lessonId", http.StatusBadRequest)
+			logger.Error("Can't get lessonId", sl.Err(err))
+			return
+		}
+
+		lesson, err := storage.GetLessonById(lessonId)
+		if err != nil {
+			http.Error(w, "Can't get lesson", http.StatusInternalServerError)
+			logger.Error("Can't get lesson", sl.Err(err))
+			return
+		}
+
+		if isStudentInLesson, err := storage.IsStudentInLesson(lesson.ID, studentId); err != nil {
+			http.Error(w, "Can't get lesson", http.StatusInternalServerError)
+			logger.Error("Can't get lesson", sl.Err(err))
+			return
+		} else if !isStudentInLesson {
+			http.Error(w, "Student is not in lesson", http.StatusForbidden)
+			logger.Error("Student is not in lesson", sl.Err(err))
 			return
 		}
 

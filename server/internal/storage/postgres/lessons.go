@@ -40,3 +40,22 @@ func (s *Storage) GetLessonByHomeworkId(homeworkId uint) (*models.Lesson, error)
 	}
 	return &lesson, nil
 }
+
+func (s *Storage) GetLessonsByStudentId(studentId uint) ([]*models.Lesson, error) {
+	tx := s.Db.Begin()
+	defer tx.Commit()
+	var student models.Student
+	result := tx.Preload("Lessons").First(&student, studentId)
+
+	return student.Lessons, result.Error
+}
+
+func (s *Storage) IsStudentInLesson(lessonId, studentId uint) (bool, error) {
+	tx := s.Db.Begin()
+	defer tx.Commit()
+	var lesson models.Lesson
+	result := tx.Preload("Students").
+		Joins("JOIN students_to_groups sg ON sg.group_id = lessons.group_id").
+		First(&lesson, "sg.student_id = ? AND lessons.lesson_id = ?", studentId, lessonId)
+	return result.RowsAffected != 0, result.Error
+}

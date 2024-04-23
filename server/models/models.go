@@ -10,8 +10,8 @@ type Student struct {
 	gorm.Model
 	Name             string
 	Stage            int64
-	Login            string `gorm:"unique;"`
-	Password         string
+	Login            string    `gorm:"unique;"`
+	Password         string    `json:"-"`
 	Lessons          []*Lesson `gorm:"many2many:students_to_lessons;"`
 	HomeworksAnswers []*HomeworkAnswer
 	Groups           []*Group `gorm:"many2many:students_to_groups;"`
