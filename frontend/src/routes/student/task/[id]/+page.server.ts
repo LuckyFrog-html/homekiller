@@ -1,24 +1,30 @@
-import { error, type Actions, fail } from '@sveltejs/kit';
+import { error, type Actions, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from "./$types";
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { formSchema } from './schema';
+import { api } from '$lib/api';
+import type { Task } from '$lib/types';
 
 /** @type {PageServerLoad} */
-export async function load({ params }: Parameters<PageServerLoad>[0]): Promise<ReturnType<PageServerLoad>> {
-    const task = {
-        id: params.id,
-        description: "lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-        subject: "Math",
-        completed: false,
+export async function load({ params, cookies }: Parameters<PageServerLoad>[0]) {
+    const token = cookies.get('token');
+    const taskReq = await api.get(`/homeworks/${params.id}`, { token });
+
+    if (taskReq.type === 'error' && taskReq.status === 401) {
+        return redirect(303, '/login');
     }
+
+    if (taskReq.type === "networkerror" || taskReq.type === "error") {
+        return redirect(303, '/login');
+    }
+
+    const task = taskReq.data as Task;
 
     return {
         task,
         form: await superValidate(zod(formSchema)),
     };
-
-    error(404, 'Not found');
 }
 
 

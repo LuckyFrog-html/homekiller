@@ -42,7 +42,7 @@
             {#if !task.IsDone && (selectedGroup == "-1" || selectedGroup == task.GroupId.toString())}
                 <a
                     class="w-full rounded border-slate-200 dark:border-slate-800 border bg-slate-100 dark:bg-slate-800 h-fit p-3"
-                    href="/student/tasks/{task.ID}"
+                    href="/student/task/{task.ID}"
                 >
                     <h4 class="text-xl">{task.GroupTitle}</h4>
                     <p class="overflow-ellipsis line-clamp-1">
@@ -56,14 +56,15 @@
 
         {#each tasks as task}
             {#if task.IsDone && (selectedGroup == "-1" || selectedGroup == task.GroupId.toString())}
-                <div
+                <a
                     class="w-full rounded border-slate-200 dark:border-slate-800 border bg-slate-100 dark:bg-slate-800 h-fit p-3"
+                    href="/student/task/{task.ID}"
                 >
                     <h4 class="text-xl">{task.GroupTitle}</h4>
                     <p class="overflow-ellipsis line-clamp-1">
                         {task.Description}
                     </p>
-                </div>
+                </a>
             {/if}
         {/each}
     </main>
