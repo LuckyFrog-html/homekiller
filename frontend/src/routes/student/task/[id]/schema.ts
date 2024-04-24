@@ -3,8 +3,11 @@ import { z } from "zod";
 export const formSchema = z.object({
     answer: z.string().min(1, "Ответ не может быть пустым"),
     files: z
-        .instanceof(File, { message: 'Please upload a file.' })
-        .array()
+        .custom<File>((value) => {
+            if (!value) return true;
+            return true;
+        })
+        .array(),
 })
 
 export type FormSchema = typeof formSchema;

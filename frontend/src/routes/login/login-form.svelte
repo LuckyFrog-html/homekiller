@@ -36,7 +36,7 @@
     <div class="flex justify-between items-center">
         <Form.Button>Войти</Form.Button>
         <p>
-            Нет аккаунта? <a href="/register" class="text-blue-600">Создать</a>
+            Учитель? <a href="/login/teacher" class="text-blue-600">Войти</a>
         </p>
     </div>
 </form>

@@ -4,6 +4,7 @@
     /* @type {import('./$types').PageData} */
     export let data;
     const tasks = data.tasks;
+    console.log(tasks);
 
     const groupsHash: any = {};
 

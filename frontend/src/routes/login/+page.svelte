@@ -9,7 +9,7 @@
 <main class="flex h-full items-center justify-center">
     <Card.Root class="w-[30rem]">
         <Card.Header>
-            <Card.Title>Логин форма</Card.Title>
+            <Card.Title>Вход в аккаунт ученика</Card.Title>
         </Card.Header>
         <Card.Content>
             <LoginForm data={data.form} />
