@@ -2,6 +2,11 @@
     import * as ToggleGroup from "$lib/components/ui/toggle-group";
     import type { Group, Lesson, Student } from "$lib/types";
     import { parseDateFromString } from "$lib/utils";
+    import type { PageData } from "./$types";
+    export let data: PageData;
+
+    const students = data.students;
+    const lessons = data.lessons;
 
     /* @type {import('./$types').PageData} */
     // export let data;
@@ -16,27 +21,27 @@
         IsActive: true,
     };
 
-    const students: Student[] = [
-        {
-            ID: 1,
-            CreatedAt: "2024-03-26 16:13:41.557+07",
-            DeletedAt: null,
-            UpdatedAt: "2024-03-26 16:13:41.557+07",
-            Login: "student0",
-            Name: "Вася",
-            Stage: 1,
-        },
-    ];
+    // const students: Student[] = [
+    //     {
+    //         ID: 1,
+    //         CreatedAt: "2024-03-26 16:13:41.557+07",
+    //         DeletedAt: null,
+    //         UpdatedAt: "2024-03-26 16:13:41.557+07",
+    //         Login: "student0",
+    //         Name: "Вася",
+    //         Stage: 1,
+    //     },
+    // ];
 
-    const lessons: Lesson[] = [
-        {
-            ID: 1,
-            CreatedAt: "2024-03-26 16:13:41.557+07",
-            DeletedAt: null,
-            UpdatedAt: "2024-03-26 16:13:41.557+07",
-            Date: "2024-03-26 16:13:41.557+07",
-        },
-    ];
+    // const lessons: Lesson[] = [
+    //     {
+    //         ID: 1,
+    //         CreatedAt: "2024-03-26 16:13:41.557+07",
+    //         DeletedAt: null,
+    //         UpdatedAt: "2024-03-26 16:13:41.557+07",
+    //         Date: "2024-03-26 16:13:41.557+07",
+    //     },
+    // ];
 
     // for (const task of groups) {
     //     groupsHash[task.GroupId.toString()] = task.GroupTitle;
