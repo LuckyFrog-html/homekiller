@@ -68,12 +68,12 @@ func (s *Storage) GetHomeworkById(id uint) (models.Homework, error) {
 	return homework, result.Error
 }
 
-func (s *Storage) AddHomeworkAnswer(homeworkId, studentId uint, answer string) error {
+func (s *Storage) AddHomeworkAnswer(homeworkId, studentId uint, answer string) (models.HomeworkAnswer, error) {
 	tx := s.Db.Begin()
 	defer tx.Commit()
 	homeworkAnswer := models.HomeworkAnswer{HomeworkID: homeworkId, StudentID: studentId, Text: answer}
 	tx.Create(&homeworkAnswer)
-	return tx.Error
+	return homeworkAnswer, tx.Error
 }
 
 func (s *Storage) GetHomeworkSolvesByTeacher(teacherId uint) ([]models.HomeworkAnswer, error) {

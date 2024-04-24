@@ -224,14 +224,14 @@ func AddHomeworkAnswer(logger *slog.Logger, storage *postgres.Storage) http.Hand
 			return
 		}
 
-		err = storage.AddHomeworkAnswer(answerData.HomeworkId, studentId, answerData.Text)
+		solution, err := storage.AddHomeworkAnswer(answerData.HomeworkId, studentId, answerData.Text)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(map[string]interface{}{"status": "added"}); err != nil {
+		if err := json.NewEncoder(w).Encode(solution); err != nil {
 			logger.Error("Can't marshall student json", sl.Err(err))
 		}
 	}
