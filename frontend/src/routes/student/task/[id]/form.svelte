@@ -14,11 +14,10 @@
     const form = superForm(data, {
         validators: zodClient(formSchema),
     });
-
-    const { form: formData, enhance } = form;
+    const { form: formData, enhance, errors } = form;
 </script>
 
-<form method="POST" use:enhance>
+<form method="POST" use:enhance enctype="multipart/form-data">
     <div class="flex flex-col">
         <Form.Field {form} name="answer">
             <Form.Control let:attrs>
@@ -27,6 +26,15 @@
             </Form.Control>
             <Form.FieldErrors />
         </Form.Field>
+        <input
+            type="file"
+            multiple
+            name="files"
+            accept="image/png, image/jpeg"
+            on:input={(e) =>
+                ($formData.files = Array.from(e.currentTarget.files ?? []))}
+        />
+        {#if $errors.files}<span>{$errors.files}</span>{/if}
         <Form.Button class="w-44 mt-2">Отправить</Form.Button>
     </div>
 </form>
