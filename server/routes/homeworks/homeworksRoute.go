@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"mime"
 	"net/http"
 	"os"
 	"server/internal/http_server/middlewares"
@@ -102,53 +103,39 @@ func AddHomeworkFiles(logger *slog.Logger, storage *postgres.Storage) http.Handl
 			return
 		}
 
-		err = r.ParseMultipartForm(10 << 20)
+		_, params, err := mime.ParseMediaType(r.Header.Get("Content-Disposition"))
 		if err != nil {
-			http.Error(w, "Can't parse form: "+err.Error(), http.StatusBadRequest)
-			logger.Error("Can't parse form", sl.Err(err))
+			http.Error(w, "Can't parse file", http.StatusBadRequest)
+			logger.Error("Can't parse file", sl.Err(err))
+			return
+		}
+		splited := strings.Split(params["filename"], ".")
+		extension := splited[len(splited)-1]
+
+		fileId, err := storage.AddHomeworkFile(homeworkId, extension)
+		if err != nil {
+			http.Error(w, "Can't add file", http.StatusInternalServerError)
+			logger.Error("Can't add file", sl.Err(err))
 			return
 		}
 
-		form := r.MultipartForm
-		files := form.File["files"]
+		filePath := fmt.Sprintf("files/teachers/%d.%s", fileId, extension)
+		f, err := os.Create(filePath)
+		if err != nil {
+			http.Error(w, "Can't create file", http.StatusInternalServerError)
+			logger.Error("Can't create file", sl.Err(err))
+			return
+		}
+		defer f.Close()
 
-		filePaths := make([]string, 0, len(files))
-		for _, file := range files {
-			fileId, err := storage.AddHomeworkFile(homeworkId, file.Filename)
-			if err != nil {
-				http.Error(w, "Can't add file", http.StatusInternalServerError)
-				logger.Error("Can't add file", sl.Err(err))
-				return
-			}
-
-			splitted := strings.Split(file.Filename, ".")
-			filePath := fmt.Sprintf("files/%d.%s", fileId, splitted[len(splitted)-1])
-			f, err := file.Open()
-			if err != nil {
-				http.Error(w, fmt.Sprintf("Can't open file %s", file.Filename), http.StatusBadRequest)
-				return
-			}
-			defer f.Close()
-
-			dst, err := os.Create(filePath)
-			if err != nil {
-				http.Error(w, "Can't create file", http.StatusInternalServerError)
-				logger.Error("Can't create file", sl.Err(err))
-				return
-			}
-			defer dst.Close()
-
-			if _, err = io.Copy(dst, f); err != nil {
-				http.Error(w, fmt.Sprintf("Can't copy file %s", file.Filename), http.StatusBadRequest)
-				logger.Error("Can't copy file", sl.Err(err))
-				return
-			}
-
-			filePaths = append(filePaths, filePath)
+		if _, err = io.Copy(f, r.Body); err != nil {
+			http.Error(w, "Can't copy file", http.StatusInternalServerError)
+			logger.Error("Can't copy file", sl.Err(err))
+			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		if err = json.NewEncoder(w).Encode(map[string]interface{}{"added_files": filePaths}); err != nil {
+		if err = json.NewEncoder(w).Encode(map[string]interface{}{"file_id": fileId}); err != nil {
 			logger.Error("Can't marshall added files json", sl.Err(err))
 		}
 	}
@@ -308,65 +295,59 @@ func GetHomeworkSolveByTeacher(logger *slog.Logger, storage *postgres.Storage) h
 
 func AddFiles(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		homeworkId, err := permissions.GetHomeworkIdFromRequest(r)
+		studentId := permissions.GetStudentIdFromContext(r)
+		solutionId, err := permissions.GetSolutionIdFromRequest(r)
 		if err != nil {
-			http.Error(w, "You must send homeworkId as URL part like /homeworks/{homework_id}/files", http.StatusBadRequest)
+			http.Error(w, "You must send homeworkId as URL part like /solutions/{solution_id}/files", http.StatusBadRequest)
 			return
 		}
 
-		teacherId, err := middlewares.GetTeacherIdFromContext(r.Context())
+		solution, err := storage.GetSolutionById(solutionId)
 		if err != nil {
-			http.Error(w, "Can't get teacherId", http.StatusNotFound)
-			logger.Error("Can't get teacherId", sl.Err(err))
+			http.Error(w, "Solution not found", http.StatusNotFound)
+			logger.Error("Solution not found", sl.Err(err))
 			return
 		}
 
-		lesson, err := storage.GetLessonByHomeworkId(homeworkId)
+		if solution.Student.ID != studentId {
+			http.Error(w, "Student is not owner of this solution", http.StatusForbidden)
+			return
+		}
+
+		_, params, err := mime.ParseMediaType(r.Header.Get("Content-Disposition"))
 		if err != nil {
-			http.Error(w, "Can't get lesson", http.StatusNotFound)
-			logger.Error("Can't get lesson", sl.Err(err))
+			http.Error(w, "Can't parse file", http.StatusBadRequest)
+			logger.Error("Can't parse file", sl.Err(err))
 			return
 		}
-		if lesson.Group.TeacherID != teacherId {
-			http.Error(w, "Teacher is not owner of this group", http.StatusForbidden)
-			return
-		}
+		splited := strings.Split(params["filename"], ".")
+		extension := splited[len(splited)-1]
 
-		if !storage.IsHomeworkInLesson(homeworkId, lesson.ID) {
-			http.Error(w, "Homework not found", http.StatusNotFound)
-			return
-		}
-
-		err = r.ParseMultipartForm(10 << 20)
+		fileId, err := storage.AddSolutionFile(solutionId, extension)
 		if err != nil {
-			http.Error(w, "Can't parse form: "+err.Error(), http.StatusBadRequest)
-			logger.Error("Can't parse form", sl.Err(err))
+			http.Error(w, "Can't add file", http.StatusInternalServerError)
+			logger.Error("Can't add file", sl.Err(err))
 			return
 		}
 
-		form := r.MultipartForm
-		_ = form.File["files"]
+		filePath := fmt.Sprintf("files/students/%d.%s", fileId, extension)
+		f, err := os.Create(filePath)
+		if err != nil {
+			http.Error(w, "Can't create file", http.StatusInternalServerError)
+			logger.Error("Can't create file", sl.Err(err))
+			return
+		}
+		defer f.Close()
 
-		// TODO: Дописать
-		//filePaths := make([]string, 0, len(files))
-		//for _, file := range files {
-		//	fileId, err := storage.AddHomeworkFile(homeworkId, file.Filename)
-		//	if err != nil {
-		//		http.Error(w, "Can't add file", http.StatusInternalServerError)
-		//		logger.Error("Can't add file", sl.Err(err))
-		//		return
-		//	}
-		//
-		//	splitted := strings.Split(file.Filename, ".")
-		//	filePath := fmt.Sprintf("files/%d.%s", fileId, splitted[len(splitted)-1])
-		//	f, err := file.Open()
-		//	if err != nil {
-		//		http.Error(w, fmt.Sprintf("Can't open file %s", file.Filename), http.StatusBadRequest)
-		//		return
-		//	}
-		//	defer f.Close()
-		//
-		//	dst, err := os.Create(filePath)
-		//	if err !=
+		if _, err = io.Copy(f, r.Body); err != nil {
+			http.Error(w, "Can't copy file", http.StatusInternalServerError)
+			logger.Error("Can't copy file", sl.Err(err))
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{"file_id": fileId}); err != nil {
+			logger.Error("Can't marshall file_id json", sl.Err(err))
+		}
 	}
 }

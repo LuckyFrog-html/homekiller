@@ -118,6 +118,11 @@ func GetHomeworkIdFromRequest(r *http.Request) (uint, error) {
 	return uint(homeworkId), err
 }
 
+func GetSolutionIdFromRequest(r *http.Request) (uint, error) {
+	solutionId, err := strconv.Atoi(chi.URLParam(r, "solution_id"))
+	return uint(solutionId), err
+}
+
 func GetStudentIdFromContext(r *http.Request) uint {
 	_, claims, _ := jwtauth.FromContext(r.Context())
 	return uint(claims["id"].(float64))

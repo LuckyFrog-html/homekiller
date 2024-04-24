@@ -3,7 +3,6 @@ package postgres
 import (
 	"fmt"
 	"server/models"
-	"strings"
 	"time"
 )
 
@@ -35,12 +34,11 @@ func (s *Storage) AddHomeworkFiles(homeworkId uint, files []string) error {
 	return tx.Error
 }
 
-func (s *Storage) AddHomeworkFile(homeworkId uint, file string) (uint, error) {
+func (s *Storage) AddHomeworkFile(homeworkId uint, extension string) (uint, error) {
 	tx := s.Db.Begin()
-	homeworkFile := models.HomeworkFile{HomeworkID: homeworkId, Filepath: file}
+	homeworkFile := models.HomeworkFile{HomeworkID: homeworkId, Filepath: ""}
 	tx.Create(&homeworkFile)
-	tmp := strings.Split(file, ".")
-	homeworkFile.Filepath = fmt.Sprintf("files/%d.%s", homeworkFile.ID, tmp[len(tmp)-1])
+	homeworkFile.Filepath = fmt.Sprintf("files/teachers/%d.%s", homeworkFile.ID, extension)
 	tx.Save(&homeworkFile)
 	tx.Commit()
 	return homeworkFile.ID, tx.Error
