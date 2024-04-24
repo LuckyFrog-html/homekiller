@@ -24,11 +24,12 @@
     "vite": "^5.0.3"
   },
   "type": "module",
-  "dependencies": {
-    "bits-ui": "^0.21.1",
+  "dependencies": { 
+    "bits-ui": "^0.21.4",
     "clsx": "^2.1.0",
     "formsnap": "^0.5.1",
-    "lucide-svelte": "^0.344.0",
+    "lazygit": "^1.0.4",
+    "lucide-svelte": "^0.373.0",
     "mode-watcher": "^0.2.1",
     "sveltekit-superforms": "^2.6.2",
     "tailwind-merge": "^2.2.1",

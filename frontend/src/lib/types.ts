@@ -13,33 +13,33 @@ export type Homework = {
     CreatedAt: string,
     UpdatedAt: string | null,
     DeletedAt: string | null,
-    Lesson: Lesson,
+    Deadline: string
     MaxScore: number,
     Description: string,
-    Deadline: Date
+    Lesson?: Lesson,
 }
 
 export type Task = {
     ID: number,
     CreatedAt: string,
-    UpdatedAt: string | null,
+    UpdatedAt: string,
     DeletedAt: string | null,
     Description: string,
     LessonID: number,
     Deadline: string,
     MaxScore: number,
-    HomeworkFiles: any[],
+    HomeworkFiles: any[] | null,
     HomeworkAnswers: any,
-    Lesson: Lesson,
-    IsDone: boolean,
-    GroupId: number,
-    GroupTitle: string,
+    Lesson: Lesson | null,
+    IsDone?: boolean,
+    GroupId?: number,
+    GroupTitle?: string,
 }
 
 export type Lesson = {
     ID: number,
     CreatedAt: string,
-    UpdatedAt: string | null,
+    UpdatedAt: string,
     DeletedAt: string | null,
     Date: string,
     GroupID?: number,
@@ -58,6 +58,20 @@ export type Group = {
     Teacher?: Teacher,
 }
 
+export type Solution = {
+    ID: number,
+    CreatedAt: string,
+    UpdatedAt: string,
+    DeletedAt: string | null,
+    Text: string,
+    HomeworkID: number,
+    StudentID: number,
+    HomeworkAnswerFiles: any[] | null,
+    TeacherResumes: null,
+    Student: Student | null,
+    Homework: Task | null,
+}
+
 export type Teacher = {
     ID: number,
     CreatedAt: string,
@@ -66,3 +80,4 @@ export type Teacher = {
     Name: string,
     Login: string,
 }
+
