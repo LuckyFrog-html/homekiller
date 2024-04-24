@@ -54,7 +54,7 @@
 
 <div class="flex flex-col items-center h-full w-full">
     <h2 class="text-3xl mt-3">Группа: {group.Title}</h2>
-    
+
     <main class="grid grid-cols-2 w-full p-3 gap-3">
         <div class="flex flex-col gap-3">
             <h1 class="text-2xl">Студенты:</h1>
@@ -65,25 +65,19 @@
                     {student.Name}
                 </h4>
             {/each}
+            <button class="rounded mt-10 border-slate-200 dark:border-slate-800 border bg-slate-100 dark:bg-slate-800 h-fit p-3">Добавить нового</button>
         </div>
-
-        <!-- <h1 class="text-3xl">Сделано:</h1> -->
 
         <div class="flex flex-col gap-3">
             <h1 class="text-2xl">Уроки:</h1>
 
             {#each lessons as lesson}
-                <!-- {#if !task.IsDone && (selectedGroup == "-1" || selectedGroup == task.GroupId.toString())} -->
                 <a
                     class="w-full rounded border-slate-200 dark:border-slate-800 border bg-slate-100 dark:bg-slate-800 h-fit p-3"
                     href="/teacher/lesson/{lesson.ID}"
                 >
                     <h4 class="text-xl">{parseDateFromString(lesson.Date)}</h4>
-                    <!-- <p class="overflow-ellipsis line-clamp-1"> -->
-                    <!-- {group.Description} -->
-                    <!-- </p> -->
                 </a>
-                <!-- {/if} -->
             {/each}
         </div>
     </main>
