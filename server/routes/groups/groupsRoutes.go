@@ -46,6 +46,8 @@ func AddStudentsToGroup(logger *slog.Logger, storage *postgres.Storage) http.Han
 			return
 		}
 
+		groupId, err := permissions.GetGroupIdFromRequest(r)
+
 		var groupData communicationJson.AddStudentToGroupJson
 
 		if err := json.NewDecoder(r.Body).Decode(&groupData); err != nil {
@@ -54,12 +56,12 @@ func AddStudentsToGroup(logger *slog.Logger, storage *postgres.Storage) http.Han
 			return
 		}
 
-		if !storage.IsTeacherInGroup(groupData.GroupId, teacherId) {
+		if !storage.IsTeacherInGroup(groupId, teacherId) {
 			http.Error(w, "Teacher is not owner of this group", http.StatusForbidden)
 			return
 		}
 
-		err = storage.AddStudentsToGroup(groupData.GroupId, groupData.StudentsIds)
+		err = storage.AddStudentsToGroup(groupId, groupData.StudentsIds)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

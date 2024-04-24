@@ -6,16 +6,14 @@ import (
 	"server/models"
 )
 
-func (s *Storage) GetAllStudents() error {
+func (s *Storage) GetAllStudents() ([]models.Student, error) {
 	tx := s.Db.Begin()
 	defer tx.Commit()
-	var student models.Student
+	var students []models.Student
 
-	students := tx.Table("students").First(&student)
+	res := tx.Table("students").Find(&students)
 
-	print(students)
-
-	return nil
+	return students, res.Error
 }
 
 func (s *Storage) GetStudentByID(id uint) (*models.Student, error) {

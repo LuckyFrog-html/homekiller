@@ -142,3 +142,8 @@ func GetLessonIdFromRequest(r *http.Request) (uint, error) {
 	lessonId, err := strconv.Atoi(chi.URLParam(r, "lesson_id"))
 	return uint(lessonId), err
 }
+
+func GetGroupIdFromRequest(r *http.Request) (uint, error) {
+	groupId, err := strconv.Atoi(chi.URLParam(r, "group_id"))
+	return uint(groupId), err
+}

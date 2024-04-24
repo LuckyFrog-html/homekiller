@@ -80,8 +80,9 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 		r.Post("/students", students.AddStudentHandler(log, storage))
 		r.Post("/groups", groups.AddGroup(log, storage))
 		r.Get("/teacher/groups", groups.GetGroupsByTeacher(log, storage))
-		r.Post("/students", groups.AddStudentsToGroup(log, storage))
+		r.Post("/groups/{group_id}/students", groups.AddStudentsToGroup(log, storage))
 		r.Get("/groups/{group_id}/students", groups.GetStudentsFromGroup(log, storage))
+		r.Get("/students/all", students.GetAllStudents(log, storage))
 
 		r.Post("/lessons", lessons.AddLesson(log, storage))
 		r.Post("/lessons/{lesson_id}", lessons.MarkStudentAttendance(log, storage)) // TODO: Дописать геттер для списка отмеченных учеников

@@ -59,3 +59,17 @@ func LoginStudentHandler(logger *slog.Logger, storage *postgres.Storage, authTok
 		}
 	}
 }
+
+func GetAllStudents(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		students, err := storage.GetAllStudents()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(map[string]any{"students": students}); err != nil {
+			logger.Error("Can't marshall students json", sl.Err(err))
+		}
+	}
+}

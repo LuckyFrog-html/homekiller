@@ -6,5 +6,4 @@ type AddGroupJson struct {
 
 type AddStudentToGroupJson struct {
 	StudentsIds []uint `json:"students_ids"`
-	GroupId     uint   `json:"group_id"`
 }
