@@ -34,7 +34,7 @@
             on:input={(e) =>
                 ($formData.files = Array.from(e.currentTarget.files ?? []))}
         />
-        {#if $errors.files}<span>{$errors.files}</span>{/if}
+        {#if $errors.files}<span>{$errors.files[0]}</span>{/if}
         <Form.Button class="w-44 mt-2">Отправить</Form.Button>
     </div>
 </form>

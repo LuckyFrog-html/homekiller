@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { PageData } from "./$types";
-    import LoginForm from "./register-form.svelte";
+    import LoginForm from "./login-form.svelte";
     import * as Card from "$lib/components/ui/card";
 
     export let data: PageData;
@@ -9,7 +9,7 @@
 <main class="flex h-full items-center justify-center">
     <Card.Root class="w-[30rem]">
         <Card.Header>
-            <Card.Title>Логин форма</Card.Title>
+            <Card.Title>Вход в аккаунт учителя</Card.Title>
         </Card.Header>
         <Card.Content>
             <LoginForm data={data.form} />

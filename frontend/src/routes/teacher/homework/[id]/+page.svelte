@@ -1,83 +1,50 @@
 <script lang="ts">
-    import * as ToggleGroup from "$lib/components/ui/toggle-group";
-    import type { Group, Homework, Lesson, Student } from "$lib/types";
-    import { parseDateFromString } from "$lib/utils";
+    import { zodClient } from "sveltekit-superforms/adapters";
+    import type { PageData } from "./$types";
+    import Solution from "./solution.svelte";
+    import { superForm } from "sveltekit-superforms/client";
+    import { formSchema } from "./schema";
 
-    /* @type {import('./$types').PageData} */
-    // export let data;
-    // const groups = data.tasks;
-
-    const students: Student[] = [
-        {
-            ID: 1,
-            CreatedAt: "2024-03-26 16:13:41.557+07",
-            UpdatedAt: "2024-03-26 16:13:41.557+07",
-            DeletedAt: null,
-            Login: "student0",
-            Name: "Вася",
-            Stage: 1,
-        },
-    ];
-
-    const homeworks: Homework[] = [
-        {
-            ID: 1,
-            CreatedAt: "2024-03-26 16:13:41.557+07",
-            DeletedAt: null,
-            UpdatedAt: "2024-03-26 16:13:41.557+07",
-            Deadline: "2024-03-26 16:13:41.557+07",
-            Description:
-                "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deleniti itaque voluptate recusandae placeat commodi hic sapiente cumque quia ipsa ipsam?",
-            MaxScore: 10,
-        },
-    ];
-
-    // for (const task of groups) {
-    //     groupsHash[task.GroupId.toString()] = task.GroupTitle;
-    // }
-
-    // let groups = Object.entries(groupsHash).map((x) => ({
-    //     id: x[0],
-    //     title: x[1],
-    // }));
-
-    // groups = [{ id: "-1", title: "Все" }, ...groups];
-
-    //     let selectedGroup = "-1";
+    export let data: PageData;
+    const task = data.task;
+    const solutions = data.solutions;
+    const files = task.HomeworkFiles || [];
 </script>
 
 <div class="flex h-full w-full">
-    <main class="grid grid-cols-2 w-full p-3 gap-3">
-        <div class="flex flex-col gap-3">
-            <h1 class="text-3xl">Студенты:</h1>
-            {#each students as student}
-                <h4
-                    class="w-full rounded border-slate-200 dark:border-slate-800 border bg-slate-100 dark:bg-slate-800 h-fit p-3"
-                >
-                    {student.Name}
-                </h4>
-            {/each}
+    <div class="flex w-full flex-col gap-2 p-6">
+        <div>
+            <a href="/teacher/lessons/{task.LessonID}" class="text-3xl">&lt;-</a
+            >
+            <span class="text-3xl">{data.task.ID}</span>
         </div>
-
-        <!-- <h1 class="text-3xl">Сделано:</h1> -->
-
-        <div class="flex flex-col gap-3">
-            <h1 class="text-3xl">Домашки:</h1>
-
-            {#each homeworks as homework}
-                <!-- {#if !task.IsDone && (selectedGroup == "-1" || selectedGroup == task.GroupId.toString())} -->
-                <a
-                    class="w-full rounded border-slate-200 dark:border-slate-800 border bg-slate-100 dark:bg-slate-800 h-fit p-3"
-                    href="/teacher/homework/{homework.ID}"
-                >
-                    <p class="text-xl">{parseDateFromString(homework.Deadline)}</p>
-                    <p class="text-xl">{homework.Description}</p>
-                    <!-- <p class="overflow-ellipsis line-clamp-1"> -->
-                    <!-- {group.Description} -->
-                    <!-- </p> -->
-                </a>
-                <!-- {/if} -->
+        <main class="flex lg:flex-row flex-col gap-3">
+            <div class="flex flex-col w-full grow justify-between">
+                <div>
+                    {#each data.task.Description.split("\n") as paragraph}
+                        <p>{paragraph}</p>
+                    {/each}
+                </div>
+                <div class="flex flex-row gap-2 justify-self-end">
+                    {#each files as file}
+                        <a
+                            class="text-xl p-2 dark:bg-slate-800 bg-slate-300 rounded-lg w-fit"
+                            href={`/${file.Filepath}`}
+                            download
+                        >
+                            {file.Filepath.split("/").pop()}
+                        </a>
+                    {/each}
+                </div>
+            </div>
+        </main>
+        {#if solutions}
+            <h2 class="text-2xl">Решения</h2>
+            {#each solutions as solution}
+                <Solution {solution} data={data.form} />
             {/each}
-        </div>
-    </main>
+        {:else}
+            <h2>Нет решений</h2>
+        {/if}
+    </div>
 </div>

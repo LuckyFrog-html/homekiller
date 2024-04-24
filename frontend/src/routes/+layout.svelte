@@ -21,9 +21,6 @@
                 <Moon class="h-[1.2rem] w-[1.2rem] hidden dark:block" />
                 <span class="sr-only">Toggle theme</span>
             </Button>
-            <Button href="/register" class="hidden md:block"
-                >Зарегестрироваться</Button
-            >
             <Button href="/login">Войти</Button>
         </div>
     </nav>

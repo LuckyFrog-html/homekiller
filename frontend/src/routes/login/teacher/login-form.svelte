@@ -19,31 +19,21 @@
 </script>
 
 <form method="POST" use:enhance>
-    <Form.Field {form} name="name">
-        <Form.Control let:attrs>
-            <Form.Label>Имя</Form.Label>
-            <Input {...attrs} bind:value={$formData.name} />
-        </Form.Control>
-        <Form.FieldErrors />
-    </Form.Field>
-    <Form.Field {form} name="username">
+    <Form.Field {form} name="login">
         <Form.Control let:attrs>
             <Form.Label>Логин</Form.Label>
-            <Input {...attrs} bind:value={$formData.username} />
+            <Input {...attrs} bind:value={$formData.login} />
         </Form.Control>
         <Form.FieldErrors />
     </Form.Field>
     <Form.Field {form} name="password">
         <Form.Control let:attrs>
             <Form.Label>Пароль</Form.Label>
-            <Input {...attrs} bind:value={$formData.password} />
+            <Input {...attrs} bind:value={$formData.password} type="password" />
         </Form.Control>
         <Form.FieldErrors />
     </Form.Field>
     <div class="flex justify-between items-center">
         <Form.Button>Войти</Form.Button>
-        <p>
-            Нет аккаунта? <a href="/register" class="text-blue-600">Создать</a>
-        </p>
     </div>
 </form>
