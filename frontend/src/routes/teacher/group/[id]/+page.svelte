@@ -3,62 +3,15 @@
     import type { Group, Lesson, Student } from "$lib/types";
     import { parseDateFromString } from "$lib/utils";
     import type { PageData } from "./$types";
-    export let data: PageData;
 
+    export let data: PageData;
     const students = data.students;
     const lessons = data.lessons;
-
-    /* @type {import('./$types').PageData} */
-    // export let data;
-    // const groups = data.tasks;
-
-    const group: Group = {
-        ID: 1,
-        CreatedAt: "2024-03-26T16:33:43.335+07:00",
-        UpdatedAt: "2024-03-26T16:33:43.335+07:00",
-        DeletedAt: null,
-        Title: "├Ёєяяр яєяёшъют",
-        IsActive: true,
-    };
-
-    // const students: Student[] = [
-    //     {
-    //         ID: 1,
-    //         CreatedAt: "2024-03-26 16:13:41.557+07",
-    //         DeletedAt: null,
-    //         UpdatedAt: "2024-03-26 16:13:41.557+07",
-    //         Login: "student0",
-    //         Name: "Вася",
-    //         Stage: 1,
-    //     },
-    // ];
-
-    // const lessons: Lesson[] = [
-    //     {
-    //         ID: 1,
-    //         CreatedAt: "2024-03-26 16:13:41.557+07",
-    //         DeletedAt: null,
-    //         UpdatedAt: "2024-03-26 16:13:41.557+07",
-    //         Date: "2024-03-26 16:13:41.557+07",
-    //     },
-    // ];
-
-    // for (const task of groups) {
-    //     groupsHash[task.GroupId.toString()] = task.GroupTitle;
-    // }
-
-    // let groups = Object.entries(groupsHash).map((x) => ({
-    //     id: x[0],
-    //     title: x[1],
-    // }));
-
-    // groups = [{ id: "-1", title: "Все" }, ...groups];
-
-    //     let selectedGroup = "-1";
+    const group = data.group;
 </script>
 
 <div class="flex flex-col items-center h-full w-full">
-    <h2 class="text-3xl mt-3">Группа: {group.Title}</h2>
+    <h2 class="text-3xl mt-3">{group.Title}</h2>
 
     <main class="grid grid-cols-2 w-full p-3 gap-3">
         <div class="flex flex-col gap-3">
@@ -70,7 +23,10 @@
                     {student.Name}
                 </h4>
             {/each}
-            <button class="rounded mt-10 border-slate-200 dark:border-slate-800 border bg-slate-100 dark:bg-slate-800 h-fit p-3">Добавить нового</button>
+            <button
+                class="rounded mt-10 border-slate-200 dark:border-slate-800 border bg-slate-100 dark:bg-slate-800 h-fit p-3"
+                >Добавить нового</button
+            >
         </div>
 
         <div class="flex flex-col gap-3">

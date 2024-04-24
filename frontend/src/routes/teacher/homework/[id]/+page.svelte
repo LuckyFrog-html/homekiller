@@ -35,13 +35,13 @@
                 </div>
             </div>
         </main>
-        {#if solutions}
+        {#if solutions.length > 0}
             <h2 class="text-2xl">Решения</h2>
             {#each solutions as solution}
                 <Solution {solution} data={data.form} />
             {/each}
         {:else}
-            <h2>Нет решений</h2>
+            <h2 class="text-2xl">Нет решений</h2>
         {/if}
     </div>
 </div>

@@ -29,19 +29,6 @@ export let load: PageServerLoad = async function load({ params, cookies }) {
 
     let solutions = solutionsRes.data.solutions;
 
-    //TODO:: this should be returned from api by default
-    const studentsReq = await api.get<{ students: Student[] }>('/teacher/students', { token });
-    if (studentsReq.type === "networkerror" || studentsReq.type === "error") {
-        return redirect(303, '/login');
-    }
-    const studentMap: Record<number, Student> = {};
-    for (const student of studentsReq.data.students) {
-        studentMap[student.ID] = student;
-    }
-    for (const solution of solutions) {
-        solution.Student = studentMap[solution.StudentID];
-    }
-
     return {
         task,
         solutions,
