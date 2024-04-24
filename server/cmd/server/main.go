@@ -85,7 +85,7 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 		r.Get("/teacher/students", students.GetAllStudents(log, storage))
 
 		r.Post("/lessons", lessons.AddLesson(log, storage))
-		r.Post("/lessons/{lesson_id}", lessons.MarkStudentAttendance(log, storage)) // TODO: Дописать геттер для списка отмеченных учеников
+		r.Post("/lessons/{lesson_id}", lessons.MarkStudentAttendance(log, storage))
 		r.Get("/lessons/{lesson_id}/homeworks", lessons.GetHomeworksByLessonId(log, storage))
 		r.Get("/teacher/lessons", lessons.GetLessonsByTeacher(log, storage))
 
@@ -95,6 +95,7 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 
 		r.Post("/homeworks/{homework_id}/files", homeworks.AddHomeworkFiles(log, storage))
 		r.Get("/teacher/homeworks/{homework_id}", homeworks.GetHomeworkByIdByTeacher(log, storage))
+		r.Get("/homeworks/{homework_id}/solves", homeworks.GetHomeworkSolutions(log, storage))
 		r.Get("/students/{student_id}/homeworks", homeworks.GetHomeworksByStudentIdInRequest(log, storage))
 		// TODO: DELETE для студента
 		// TODO: DELETE для группы

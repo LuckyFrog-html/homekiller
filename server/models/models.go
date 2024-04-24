@@ -26,7 +26,7 @@ type Teacher struct {
 	gorm.Model
 	Name           string
 	Login          string `gorm:"unique;"`
-	Password       string
+	Password       string `json:"-"`
 	TeacherResumes []*TeacherResume
 	Subjects       []*Subject `gorm:"many2many:teacher_to_subjects;"`
 	Groups         []*Group   `gorm:"foreignKey:TeacherID;"`

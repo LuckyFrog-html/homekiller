@@ -64,7 +64,7 @@ func (s *Storage) GetHomeworkById(id uint) (models.Homework, error) {
 	tx := s.Db.Begin()
 	defer tx.Commit()
 	var homework models.Homework
-	result := tx.Preload("Lesson").Preload("HomeworkFiles").First(&homework, id)
+	result := tx.Preload("Lesson").Preload("HomeworkFiles").Preload("HomeworkAnswers").First(&homework, id)
 	return homework, result.Error
 }
 
