@@ -82,16 +82,19 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 		r.Get("/teacher/groups", groups.GetGroupsByTeacher(log, storage))
 		r.Post("/groups/{group_id}/students", groups.AddStudentsToGroup(log, storage))
 		r.Get("/groups/{group_id}/students", groups.GetStudentsFromGroup(log, storage))
-		r.Get("/students/all", students.GetAllStudents(log, storage))
+		r.Get("/teacher/students", students.GetAllStudents(log, storage))
 
 		r.Post("/lessons", lessons.AddLesson(log, storage))
 		r.Post("/lessons/{lesson_id}", lessons.MarkStudentAttendance(log, storage)) // TODO: Дописать геттер для списка отмеченных учеников
+		r.Get("/lessons/{lesson_id}/homeworks", lessons.GetHomeworksByLessonId(log, storage))
+		r.Get("/teacher/lessons", lessons.GetLessonsByTeacher(log, storage))
 
 		r.Post("/homeworks", homeworks.AddHomework(log, storage))
 		r.Get("/solves", homeworks.GetHomeworkSolvesByTeacher(log, storage))
 		r.Get("/solves/{solve_id}", homeworks.GetHomeworkSolveByTeacher(log, storage))
 
 		r.Post("/homeworks/{homework_id}/files", homeworks.AddHomeworkFiles(log, storage))
+		r.Get("/teacher/homeworks/{homework_id}", homeworks.GetHomeworkByIdByTeacher(log, storage))
 		r.Get("/students/{student_id}/homeworks", homeworks.GetHomeworksByStudentIdInRequest(log, storage))
 		// TODO: DELETE для студента
 		// TODO: DELETE для группы

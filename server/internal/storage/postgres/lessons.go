@@ -59,3 +59,13 @@ func (s *Storage) IsStudentInLesson(lessonId, studentId uint) (bool, error) {
 		First(&lesson, "sg.student_id = ? AND lessons.lesson_id = ?", studentId, lessonId)
 	return result.RowsAffected != 0, result.Error
 }
+
+func (s *Storage) GetLessonsByTeacher(teacherId uint) ([]*models.Lesson, error) {
+	tx := s.Db.Begin()
+	defer tx.Commit()
+	var lessons []*models.Lesson
+	result := tx.Preload("Group").Preload("Homeworks").Preload("Students").
+		Joins("JOIN groups ON groups.id = lessons.group_id").
+		Where("groups.teacher_id = ?", teacherId).Find(&lessons)
+	return lessons, result.Error
+}

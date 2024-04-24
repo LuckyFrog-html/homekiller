@@ -351,3 +351,34 @@ func AddFiles(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
 		}
 	}
 }
+
+func GetHomeworkByIdByTeacher(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		homeworkId, err := permissions.GetHomeworkIdFromRequest(r)
+		if err != nil {
+			http.Error(w, "You must send homeworkId as URL part like /homeworks/{homework_id}", http.StatusBadRequest)
+			return
+		}
+		homework, err := storage.GetHomeworkById(homeworkId)
+		if err != nil {
+			http.Error(w, "Can't get homework", http.StatusForbidden)
+			logger.Error("Can't get homework", sl.Err(err))
+			return
+		}
+		teacherId, err := middlewares.GetTeacherIdFromContext(r.Context())
+		if err != nil {
+			http.Error(w, "Can't get teacherId", http.StatusNotFound)
+			logger.Error("Can't get teacherId", sl.Err(err))
+			return
+		}
+		if !storage.IsTeacherInGroup(homework.Lesson.GroupID, teacherId) {
+			http.Error(w, "Teacher is not owner of this group", http.StatusForbidden)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(homework); err != nil {
+			logger.Error("Can't marshall homework json", sl.Err(err))
+		}
+	}
+}

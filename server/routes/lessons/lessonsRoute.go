@@ -144,3 +144,61 @@ func MarkStudentAttendance(logger *slog.Logger, storage *postgres.Storage) http.
 		}
 	}
 }
+
+func GetHomeworksByLessonId(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		lessonId, err := permissions.GetLessonIdFromRequest(r)
+		if err != nil {
+			http.Error(w, "Can't get lessonId", http.StatusBadRequest)
+			logger.Error("Can't get lessonId", sl.Err(err))
+			return
+		}
+
+		teacherId, err := middlewares.GetTeacherIdFromContext(r.Context())
+		if err != nil {
+			http.Error(w, "Can't get teacherId", http.StatusNotFound)
+			logger.Error("Can't get teacherId", sl.Err(err))
+			return
+		}
+
+		lesson, err := storage.GetLessonById(lessonId)
+		if err != nil {
+			http.Error(w, "Can't get lesson", http.StatusInternalServerError)
+			logger.Error("Can't get lesson", sl.Err(err))
+			return
+		}
+
+		if lesson.Group.TeacherID != teacherId {
+			http.Error(w, "Teacher is not owner of this group", http.StatusForbidden)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(map[string]any{"homeworks": lesson.Homeworks}); err != nil {
+			logger.Error("Can't marshall homeworks json", sl.Err(err))
+		}
+	}
+}
+
+func GetLessonsByTeacher(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		teacherId, err := middlewares.GetTeacherIdFromContext(r.Context())
+		if err != nil {
+			http.Error(w, "Can't get teacherId", http.StatusNotFound)
+			logger.Error("Can't get teacherId", sl.Err(err))
+			return
+		}
+
+		lessons, err := storage.GetLessonsByTeacher(teacherId)
+		if err != nil {
+			http.Error(w, "Can't get lessons", http.StatusInternalServerError)
+			logger.Error("Can't get lessons", sl.Err(err))
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(map[string]any{"lessons": lessons}); err != nil {
+			logger.Error("Can't marshall lessons json", sl.Err(err))
+		}
+	}
+}
