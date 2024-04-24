@@ -48,6 +48,8 @@ export const actions: Actions = {
         const token = event.cookies.get('token');
         const res = await api.post(`/homeworks`, { homework_id: +homework_id, text }, { token });
 
+        console.log(res);
+
         if (res.type === 'error' && res.status === 401) {
             return redirect(303, '/login');
         }

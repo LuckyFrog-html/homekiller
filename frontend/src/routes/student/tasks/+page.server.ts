@@ -13,6 +13,5 @@ export async function load({ cookies }: Parameters<PageServerLoad>[0]): Promise<
         return { tasks };
     }
 
-
     return redirect(302, '/login');
 }
