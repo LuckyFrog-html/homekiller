@@ -1,74 +1,50 @@
 import { api } from '$lib/api';
 import type { Actions, PageServerLoad } from './$types';
-import type { Solution, Task } from '$lib/types';
+import type { Solution, Student, Task } from '$lib/types';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { formSchema } from './schema';
-import { fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 
 export let load: PageServerLoad = async function load({ params, cookies }) {
     const token = cookies.get('teacher_token');
-    const res = await api.get(`/solves`, { token });
+    const homeworkRes = await api.get<Task>(`/teacher/homeworks/${params.id}`, { token });
 
-    const mockSolves: Solution[] = [
-        {
-            ID: 1,
-            CreatedAt: '2024-04-24T21:59:12.537213+07:00',
-            UpdatedAt: '2024-04-24T21:59:12.537213+07:00',
-            DeletedAt: null,
-            Text: 'фывафавы\r\nОднако не все так просто',
-            HomeworkID: 1,
-            StudentID: 2,
-            HomeworkAnswerFiles: null,
-            TeacherResumes: null,
-            Student: {
-                ID: 2,
-                CreatedAt: '2024-04-21T23:35:28.053173+07:00',
-                UpdatedAt: '2024-04-21T23:35:28.053173+07:00',
-                DeletedAt: null,
-                Name: 'Артём Майдуров',
-                Stage: 11,
-                Login: 'artem',
-                Lessons: null,
-                HomeworksAnswers: null,
-                Groups: null
-            },
-            Homework: {
-                ID: 1,
-                CreatedAt: '2024-04-21T23:42:51.090281+07:00',
-                UpdatedAt: '2024-04-21T23:42:51.090281+07:00',
-                DeletedAt: null,
-                Description: 'Это тестовый урок',
-                LessonID: 1,
-                Deadline: '2024-04-18T07:00:00+07:00',
-                MaxScore: 10,
-                HomeworkFiles: null,
-                HomeworkAnswers: null,
-                Lesson: null,
-            },
-        }
-    ];
+    if (homeworkRes.type === "error" && homeworkRes.status === 401) {
+        return redirect(303, '/login');
+    }
 
-    const mockTask: Task = {
-        ID: 2,
-        CreatedAt: '2024-04-21T23:45:12.890279+07:00',
-        UpdatedAt: '2024-04-21T23:45:12.890279+07:00',
-        DeletedAt: null,
-        Description: 'Это тестовый урок',
-        LessonID: 4,
-        Deadline: '2024-04-30T07:00:00+07:00',
-        MaxScore: 10,
-        HomeworkFiles: null,
-        HomeworkAnswers: null,
-        Lesson: null,
-        IsDone: false,
-        GroupId: 2,
-        GroupTitle: 'Группа 2: Шизы дрожащие',
-    };
+    if (homeworkRes.type === "networkerror" || homeworkRes.type === "error") {
+        return redirect(303, '/login');
+    }
+
+    const task = homeworkRes.data;
+
+    type SolvesRes = { solutions: Solution[] };
+    const solutionsRes = await api.get<SolvesRes>(`/homeworks/${params.id}/solves`, { token });
+
+    if (solutionsRes.type === "networkerror" || solutionsRes.type === "error") {
+        return redirect(303, '/login');
+    }
+
+    let solutions = solutionsRes.data.solutions;
+
+    //TODO:: this should be returned from api by default
+    const studentsReq = await api.get<{ students: Student[] }>('/teacher/students', { token });
+    if (studentsReq.type === "networkerror" || studentsReq.type === "error") {
+        return redirect(303, '/login');
+    }
+    const studentMap: Record<number, Student> = {};
+    for (const student of studentsReq.data.students) {
+        studentMap[student.ID] = student;
+    }
+    for (const solution of solutions) {
+        solution.Student = studentMap[solution.StudentID];
+    }
 
     return {
-        task: mockTask,
-        solutions: mockSolves,
+        task,
+        solutions,
         id: params.id,
         form: await superValidate(zod(formSchema)),
     };

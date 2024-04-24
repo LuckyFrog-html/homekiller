@@ -27,7 +27,7 @@
                 <p>{paragraph}</p>
             {/each}
         </div>
-        <div>
+        <div class="min-w-[200px]">
             <p>{solution.Student?.Name}</p>
             {#if solution.HomeworkAnswerFiles}
                 {#each solution.HomeworkAnswerFiles as file}
@@ -42,6 +42,8 @@
             {/if}
         </div>
     </div>
+
+    <div class="my-1 h-1 w-full rounded bg-slate-300 dark:bg-slate-700"></div>
 
     <form method="POST" use:enhance>
         <Form.Field {form} name="score">

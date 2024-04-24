@@ -1,9 +1,6 @@
 <script lang="ts">
-    import { zodClient } from "sveltekit-superforms/adapters";
     import type { PageData } from "./$types";
     import Solution from "./solution.svelte";
-    import { superForm } from "sveltekit-superforms/client";
-    import { formSchema } from "./schema";
 
     export let data: PageData;
     const task = data.task;
@@ -14,12 +11,12 @@
 <div class="flex h-full w-full">
     <div class="flex w-full flex-col gap-2 p-6">
         <div>
-            <a href="/teacher/lessons/{task.LessonID}" class="text-3xl">&lt;-</a
-            >
+            <a href="/teacher/lesson/{task.LessonID}" class="text-3xl">&lt;-</a>
             <span class="text-3xl">{data.task.ID}</span>
         </div>
-        <main class="flex lg:flex-row flex-col gap-3">
+        <main class="flex lg:flex-row flex-col gap-3 mb-3">
             <div class="flex flex-col w-full grow justify-between">
+                <h1 class="text-3xl mb-3">Задание</h1>
                 <div>
                     {#each data.task.Description.split("\n") as paragraph}
                         <p>{paragraph}</p>
