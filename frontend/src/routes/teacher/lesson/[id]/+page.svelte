@@ -8,6 +8,7 @@
 </script>
 
 <div class="flex flex-col items-center h-full w-full">
+    <a href="/teacher/group/{lesson.GroupID}" class="text-3xl">&lt;-</a>
     <h2 class="text-3xl mt-3">
         Урок {lesson.ID} у группы {lesson.Group?.Title}
     </h2>
