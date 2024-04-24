@@ -408,8 +408,10 @@ func GetHomeworkSolutions(logger *slog.Logger, storage *postgres.Storage) http.H
 			return
 		}
 
+		solutions, err := storage.GetHomeworkSolutions(homeworkId)
+
 		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(map[string]any{"solutions": homework.HomeworkAnswers}); err != nil {
+		if err := json.NewEncoder(w).Encode(map[string]any{"solutions": solutions}); err != nil {
 			logger.Error("Can't marshall homework solutions json", sl.Err(err))
 		}
 	}

@@ -25,3 +25,13 @@ func (s *Storage) AddSolutionFile(solutionId uint, extension string) (uint, erro
 
 	return solutionFile.ID, result.Error
 }
+
+func (s *Storage) GetHomeworkSolutions(homeworkId uint) ([]models.HomeworkAnswer, error) {
+	tx := s.Db.Begin()
+	defer tx.Commit()
+	var solutions []models.HomeworkAnswer
+
+	result := tx.Preload("Student").Preload("HomeworkAnswerFiles").Preload("Homework").Find(&solutions, "homework_id = ?", homeworkId)
+
+	return solutions, result.Error
+}
