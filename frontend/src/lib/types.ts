@@ -13,10 +13,10 @@ export type Homework = {
     CreatedAt: string,
     UpdatedAt: string | null,
     DeletedAt: string | null,
-    Lesson: Lesson,
+    Deadline: string
     MaxScore: number,
     Description: string,
-    Deadline: Date
+    Lesson?: Lesson,
 }
 
 export type Task = {
