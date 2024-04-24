@@ -97,6 +97,8 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 		r.Get("/teacher/homeworks/{homework_id}", homeworks.GetHomeworkByIdByTeacher(log, storage))
 		r.Get("/homeworks/{homework_id}/solves", homeworks.GetHomeworkSolutions(log, storage))
 		r.Get("/students/{student_id}/homeworks", homeworks.GetHomeworksByStudentIdInRequest(log, storage))
+
+		r.Get("/groups/{group_id}/lessons", lessons.GetLessonsByGroup(log, storage))
 		// TODO: DELETE для студента
 		// TODO: DELETE для группы
 		// TODO: DELETE для прикрепления студента к группе

@@ -202,3 +202,38 @@ func GetLessonsByTeacher(logger *slog.Logger, storage *postgres.Storage) http.Ha
 		}
 	}
 }
+
+func GetLessonsByGroup(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		groupId, err := permissions.GetGroupIdFromRequest(r)
+		if err != nil {
+			http.Error(w, "Can't get groupId", http.StatusBadRequest)
+			logger.Error("Can't get groupId", sl.Err(err))
+			return
+		}
+
+		teacherId, err := middlewares.GetTeacherIdFromContext(r.Context())
+		if err != nil {
+			http.Error(w, "Can't get teacherId", http.StatusNotFound)
+			logger.Error("Can't get teacherId", sl.Err(err))
+			return
+		}
+
+		if !storage.IsTeacherInGroup(groupId, teacherId) {
+			http.Error(w, "Teacher is not owner of this group", http.StatusForbidden)
+			return
+		}
+
+		group, err := storage.GetGroupById(groupId)
+		if err != nil {
+			http.Error(w, "Can't get group", http.StatusInternalServerError)
+			logger.Error("Can't get group", sl.Err(err))
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(map[string]any{"lessons": group.Lessons}); err != nil {
+			logger.Error("Can't marshall lessons json", sl.Err(err))
+		}
+	}
+}

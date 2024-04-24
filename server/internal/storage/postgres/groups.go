@@ -21,7 +21,7 @@ func (s *Storage) GetGroupById(id uint) (models.Group, error) {
 	defer tx.Commit()
 	var group models.Group
 
-	result := tx.Preload("Students").First(&group, "id=?", id)
+	result := tx.Preload("Students").Preload("Lessons").First(&group, "id=?", id)
 	if result.Error != nil {
 		return models.Group{}, result.Error
 	}
