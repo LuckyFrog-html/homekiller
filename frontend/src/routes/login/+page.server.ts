@@ -1,5 +1,5 @@
 import type { PageServerLoad, Actions } from "./$types";
-import { fail } from "@sveltejs/kit";
+import { fail, redirect } from "@sveltejs/kit";
 import { setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { formSchema } from "./schema";
@@ -20,6 +20,7 @@ type tokenResponse = {
 export const actions: Actions = {
     default: async (event) => {
         const form = await superValidate(event, zod(formSchema));
+
         if (!form.valid) {
             return fail(400, {
                 form,
@@ -30,6 +31,7 @@ export const actions: Actions = {
             login: form.data.login,
             password: form.data.password
         })
+        console.log(response);
 
         if (response.type === "error" && response.status === 401) {
             return setError(form, 'login', 'Неверный логин или пароль');
@@ -41,10 +43,7 @@ export const actions: Actions = {
 
         event.cookies.set("token", response.data.token, { path: '/', expires: new Date(Date.now() + MONTH) });
 
-        return {
-            form,
-        };
-
+        return redirect(302, '/student/tasks');
     },
 };
 

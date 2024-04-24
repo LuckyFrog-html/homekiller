@@ -60,3 +60,7 @@ export const flyAndScale = (
         easing: cubicOut
     };
 };
+
+export const parseDateFromString = (str: string) => {
+    return new Date(str).toLocaleString()
+}
