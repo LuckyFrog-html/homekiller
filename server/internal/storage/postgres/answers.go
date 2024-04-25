@@ -35,3 +35,11 @@ func (s *Storage) GetHomeworkSolutions(homeworkId uint) ([]models.HomeworkAnswer
 
 	return solutions, result.Error
 }
+
+func (s *Storage) AddHomeworkSolveReview(solveId uint, comment string, score int) (models.TeacherResume, error) {
+	tx := s.Db.Begin()
+	defer tx.Commit()
+	teacherResume := models.TeacherResume{HomeworkAnswerID: solveId, Comment: comment, Score: score}
+	result := tx.Create(&teacherResume)
+	return teacherResume, result.Error
+}

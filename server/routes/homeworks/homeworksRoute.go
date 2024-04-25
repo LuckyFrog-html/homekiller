@@ -472,3 +472,37 @@ func GetHomeworkSolves(logger *slog.Logger, storage *postgres.Storage) http.Hand
 		}
 	}
 }
+
+func AddHomeworkSolveReview(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		solveId, err := permissions.GetSolveIdFromRequest(r)
+		if err != nil {
+			http.Error(w, "You must send solveId as URL part like /solves/{solve_id}/reviews", http.StatusBadRequest)
+			return
+		}
+
+		teacherId, err := middlewares.GetTeacherIdFromContext(r.Context())
+
+		if !storage.IsTeacherInSolve(teacherId, solveId) {
+			http.Error(w, "Teacher is not owner of this solve", http.StatusForbidden)
+			return
+		}
+
+		var reviewData communicationJson.HomeworkSolveReviewJson
+		if err := json.NewDecoder(r.Body).Decode(&reviewData); err != nil {
+			http.Error(w, "Can't unmarshal JSON", http.StatusBadRequest)
+		}
+
+		review, err := storage.AddHomeworkSolveReview(solveId, reviewData.Comment, reviewData.Score)
+		if err != nil {
+			http.Error(w, "Can't add review", http.StatusInternalServerError)
+			logger.Error("Can't add review", sl.Err(err))
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(review); err != nil {
+			logger.Error("Can't marshall review json", sl.Err(err))
+		}
+	}
+}

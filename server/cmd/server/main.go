@@ -92,6 +92,7 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 		r.Post("/homeworks", homeworks.AddHomework(log, storage))
 		r.Get("/solves", homeworks.GetHomeworkSolvesByTeacher(log, storage))
 		r.Get("/solves/{solve_id}", homeworks.GetHomeworkSolveByTeacher(log, storage))
+		r.Post("/solves/{solve_id}/reviews", homeworks.AddHomeworkSolveReview(log, storage))
 
 		r.Post("/homeworks/{homework_id}/files", homeworks.AddHomeworkFiles(log, storage))
 		r.Get("/teacher/homeworks/{homework_id}", homeworks.GetHomeworkByIdByTeacher(log, storage))
