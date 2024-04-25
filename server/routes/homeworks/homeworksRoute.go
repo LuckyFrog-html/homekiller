@@ -444,3 +444,31 @@ func GetHomeworkSolveReviewsByIdReviews(logger *slog.Logger, storage *postgres.S
 		}
 	}
 }
+
+func GetHomeworkSolves(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		homeworkId, err := permissions.GetHomeworkIdFromRequest(r)
+		if err != nil {
+			http.Error(w, "You must send homeworkId as URL part like /homeworks/{homework_id}/solutions", http.StatusBadRequest)
+			return
+		}
+		studentId := permissions.GetStudentIdFromContext(r)
+
+		homework, err := storage.GetHomeworkById(homeworkId)
+		if err != nil {
+			http.Error(w, "Can't get homework", http.StatusNotFound)
+			logger.Error("Can't get homework", sl.Err(err))
+			return
+		}
+
+		if !storage.IsStudentInGroup(homework.Lesson.GroupID, studentId) {
+			http.Error(w, "Student is not in this group", http.StatusForbidden)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(map[string]any{"solutions": homework.HomeworkAnswers}); err != nil {
+			logger.Error("Can't marshall homework solves json", sl.Err(err))
+		}
+	}
+}
