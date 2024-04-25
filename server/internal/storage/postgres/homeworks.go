@@ -92,7 +92,7 @@ func (s *Storage) GetHomeworkSolveById(id uint) (models.HomeworkAnswer, error) {
 	tx := s.Db.Begin()
 	defer tx.Commit()
 	var homeworkAnswer models.HomeworkAnswer
-	result := tx.Preload("Homework").Preload("Student").Preload("HomeworkAnswerFiles").First(&homeworkAnswer, id)
+	result := tx.Preload("Homework").Preload("Student").Preload("HomeworkAnswerFiles").Preload("TeacherResumes").First(&homeworkAnswer, id)
 	return homeworkAnswer, result.Error
 }
 

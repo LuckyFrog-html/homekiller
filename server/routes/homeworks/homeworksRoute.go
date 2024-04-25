@@ -416,3 +416,31 @@ func GetHomeworkSolutions(logger *slog.Logger, storage *postgres.Storage) http.H
 		}
 	}
 }
+
+func GetHomeworkSolveReviewsByIdReviews(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		solveId, err := permissions.GetSolveIdFromRequest(r)
+		if err != nil {
+			http.Error(w, "You must send solveId as URL part like /solves/{solve_id}/reviews", http.StatusBadRequest)
+			return
+		}
+		studentId := permissions.GetStudentIdFromContext(r)
+
+		solve, err := storage.GetHomeworkSolveById(solveId)
+		if err != nil {
+			http.Error(w, "Can't get solve", http.StatusNotFound)
+			logger.Error("Can't get solve", sl.Err(err))
+			return
+		}
+
+		if solve.StudentID != studentId {
+			http.Error(w, "Student is not owner of this solve", http.StatusForbidden)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(map[string]any{"reviews": solve}); err != nil {
+			logger.Error("Can't marshall solve json", sl.Err(err))
+		}
+	}
+}
