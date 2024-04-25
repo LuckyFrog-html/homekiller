@@ -1,9 +1,12 @@
-<script>
-    import { Button } from "$lib/components/ui/button";
+<script lang="ts">
+    import { browser } from "$app/environment";
+    import { goto } from "$app/navigation";
+
+    if (browser) {
+        goto("/login");
+    }
 </script>
 
-<h1>Welcome to SvelteKit</h1>
-<p>
-    Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation
-</p>
-<Button>This is it</Button>
+<main class="flex h-full items-center justify-center">
+    <p>Main</p>
+</main>
