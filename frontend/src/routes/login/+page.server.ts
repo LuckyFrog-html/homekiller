@@ -31,7 +31,6 @@ export const actions: Actions = {
             login: form.data.login,
             password: form.data.password
         })
-        console.log(response);
 
         if (response.type === "error" && response.status === 401) {
             return setError(form, 'login', 'Неверный логин или пароль');

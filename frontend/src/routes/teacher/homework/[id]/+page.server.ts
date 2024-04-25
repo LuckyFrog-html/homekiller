@@ -44,8 +44,6 @@ export const actions: Actions = {
             return fail(400, { form });
         }
 
-        console.log(form);
-
         return {
             form,
         };

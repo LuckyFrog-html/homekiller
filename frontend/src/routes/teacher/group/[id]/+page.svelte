@@ -1,6 +1,5 @@
 <script lang="ts">
-    import * as ToggleGroup from "$lib/components/ui/toggle-group";
-    import type { Group, Lesson, Student } from "$lib/types";
+    import * as Dialog from "$lib/components/ui/dialog";
     import { parseDateFromString } from "$lib/utils";
     import type { PageData } from "./$types";
 
@@ -26,8 +25,9 @@
             {/each}
             <button
                 class="rounded mt-10 border-slate-200 dark:border-slate-800 border bg-slate-100 dark:bg-slate-800 h-fit p-3"
-                >Добавить нового</button
             >
+                Добавить нового
+            </button>
         </div>
 
         <div class="flex flex-col gap-3">

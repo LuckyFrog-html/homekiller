@@ -4,7 +4,6 @@
     /* @type {import('./$types').PageData} */
     export let data;
     const tasks = data.tasks;
-    console.log(tasks);
 
     const groupsHash: any = {};
 
@@ -40,7 +39,7 @@
         <h1 class="text-3xl">Нужно сделать:</h1>
 
         {#each tasks as task}
-            {#if !task.IsDone && (selectedGroup == "-1" || selectedGroup == task.GroupId.toString())}
+            {#if !task.IsDone && (selectedGroup == "-1" || selectedGroup == task.GroupId?.toString())}
                 <a
                     class="w-full rounded border-slate-200 dark:border-slate-800 border bg-slate-100 dark:bg-slate-800 h-fit p-3"
                     href="/student/task/{task.ID}"
@@ -56,7 +55,7 @@
         <h1 class="text-3xl">Сделано:</h1>
 
         {#each tasks as task}
-            {#if task.IsDone && (selectedGroup == "-1" || selectedGroup == task.GroupId.toString())}
+            {#if task.IsDone && (selectedGroup == "-1" || selectedGroup == task.GroupId?.toString())}
                 <a
                     class="w-full rounded border-slate-200 dark:border-slate-800 border bg-slate-100 dark:bg-slate-800 h-fit p-3"
                     href="/student/task/{task.ID}"
