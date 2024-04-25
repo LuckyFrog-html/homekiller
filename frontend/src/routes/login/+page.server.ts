@@ -31,7 +31,6 @@ export const actions: Actions = {
             login: form.data.login,
             password: form.data.password
         })
-        console.log(response);
 
         if (response.type === "error" && response.status === 401) {
             return setError(form, 'login', 'Неверный логин или пароль');
@@ -41,7 +40,7 @@ export const actions: Actions = {
             return setError(form, 'login', 'Неизвестная ошибка, попробуйте снова');
         }
 
-        event.cookies.set("token", response.data.token, { path: '/', expires: new Date(Date.now() + MONTH) });
+        event.cookies.set("token", response.data.token, { path: '/', expires: new Date(Date.now() + MONTH), secure: false });
 
         return redirect(302, '/student/tasks');
     },

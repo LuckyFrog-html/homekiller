@@ -42,3 +42,12 @@ export async function load({ params, cookies }: Parameters<PageServerLoad>[0]) {
     };
 }
 
+
+export const actions: Actions = {
+    delete: async ({ request, params, cookies }) => {
+        const token = cookies.get('teacher_token');
+        const res = api.post(`/groups/${params.id}/students`, {
+            students_ids: null
+        }, { token });
+    }
+}

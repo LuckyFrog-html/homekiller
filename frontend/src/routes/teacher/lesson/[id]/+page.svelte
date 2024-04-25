@@ -1,9 +1,12 @@
 <script lang="ts">
+    import { invalidateAll } from "$app/navigation";
+    import Button from "$lib/components/ui/button/button.svelte";
     import { parseDateFromString } from "$lib/utils";
+    import AddHomeworkDialog from "./AddHomeworkDialog.svelte";
 
     /* @type {import('./$types').PageData} */
     export let data;
-    const homeworks = data.homeworks;
+    $: homeworks = data.homeworks;
     const lesson = data.lesson;
 </script>
 
@@ -28,6 +31,7 @@
                     <p class="text-xl">{homework.Description}</p>
                 </a>
             {/each}
+            <AddHomeworkDialog data={data.form} />
         </div>
     </main>
 </div>
