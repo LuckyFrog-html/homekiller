@@ -4,7 +4,7 @@ import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { formSchema } from './schema';
 import { api } from '$lib/api';
-import type { Solution, Task } from '$lib/types';
+import type { Review, Solution, Task } from '$lib/types';
 
 /** @type {PageServerLoad} */
 export async function load({ params, cookies }: Parameters<PageServerLoad>[0]) {
@@ -21,8 +21,29 @@ export async function load({ params, cookies }: Parameters<PageServerLoad>[0]) {
 
     const task = taskReq.data as Task;
 
+    const solutionsReq = await api.get<any>(`/homeworks/${params.id}/solutions`, { token });
+
+    if (solutionsReq.type === "networkerror" || solutionsReq.type === "error") {
+        return redirect(303, '/login');
+    }
+
+    const solutions = solutionsReq.data.solutions as Solution[];
+
+    for (const solution of solutions) {
+        const reviewsReq = await api.get<any>(`/solutions/${solution.ID}/reviews`, { token });
+
+        if (reviewsReq.type === "networkerror" || reviewsReq.type === "error") {
+            return redirect(303, '/login');
+        }
+
+        const reviews = reviewsReq.data.reviews as Review[];
+        console.log("reww", reviews);
+        solution.Reviews = reviews;
+    }
+
     return {
         task,
+        solutions,
         form: await superValidate(zod(formSchema)),
     };
 }
