@@ -493,7 +493,7 @@ func AddHomeworkSolveReview(logger *slog.Logger, storage *postgres.Storage) http
 			http.Error(w, "Can't unmarshal JSON", http.StatusBadRequest)
 		}
 
-		review, err := storage.AddHomeworkSolveReview(solveId, reviewData.Comment, reviewData.Score)
+		review, err := storage.AddHomeworkSolveReview(solveId, reviewData.Comment, reviewData.Score, teacherId)
 		if err != nil {
 			http.Error(w, "Can't add review", http.StatusInternalServerError)
 			logger.Error("Can't add review", sl.Err(err))
