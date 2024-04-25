@@ -126,3 +126,36 @@ func GetGroupsByTeacher(logger *slog.Logger, storage *postgres.Storage) http.Han
 		}
 	}
 }
+
+func GetGroupById(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		groupId, err := permissions.GetGroupIdFromRequest(r)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		group, err := storage.GetGroupById(groupId)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		teacherId, err := middlewares.GetTeacherIdFromContext(r.Context())
+		if err != nil {
+			http.Error(w, "Can't get teacher id", http.StatusInternalServerError)
+			logger.Error("Can't get teacher id", sl.Err(err))
+			return
+		}
+
+		if group.TeacherID != teacherId {
+			http.Error(w, "Teacher is not owner of this group", http.StatusForbidden)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(group); err != nil {
+			logger.Error("Can't marshall group json", sl.Err(err))
+		}
+	}
+}
