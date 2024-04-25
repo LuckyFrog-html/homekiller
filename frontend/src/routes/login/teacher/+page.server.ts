@@ -1,5 +1,5 @@
 import type { PageServerLoad, Actions } from "./$types";
-import { fail } from "@sveltejs/kit";
+import { fail, redirect } from "@sveltejs/kit";
 import { setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { formSchema } from "./schema";
@@ -41,10 +41,7 @@ export const actions: Actions = {
 
         event.cookies.set("teacher_token", response.data.token, { path: '/', expires: new Date(Date.now() + MONTH) });
 
-        return {
-            form,
-        };
-
+        return redirect(302, '/teacher/groups');
     },
 };
 
