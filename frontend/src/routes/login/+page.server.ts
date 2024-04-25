@@ -40,7 +40,7 @@ export const actions: Actions = {
             return setError(form, 'login', 'Неизвестная ошибка, попробуйте снова');
         }
 
-        event.cookies.set("token", response.data.token, { path: '/', expires: new Date(Date.now() + MONTH) });
+        event.cookies.set("token", response.data.token, { path: '/', expires: new Date(Date.now() + MONTH), secure: false });
 
         return redirect(302, '/student/tasks');
     },
