@@ -16,21 +16,6 @@ import (
 	"strings"
 )
 
-func GetHomeworks(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		lesson, done := permissions.ValidatePermissionsInLesson(w, r, logger, storage)
-		if done {
-			return
-		}
-
-		homeworks := lesson.Homeworks
-		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(homeworks); err != nil {
-			logger.Error("Can't marshall homeworks json", sl.Err(err))
-		}
-	}
-}
-
 func AddHomework(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var homeworkData communicationJson.HomeworkJson
@@ -126,7 +111,7 @@ func AddHomeworkFiles(logger *slog.Logger, storage *postgres.Storage) http.Handl
 			logger.Error("Can't create file", sl.Err(err))
 			return
 		}
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 
 		if _, err = io.Copy(f, r.Body); err != nil {
 			http.Error(w, "Can't copy file", http.StatusInternalServerError)
@@ -337,7 +322,7 @@ func AddFiles(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
 			logger.Error("Can't create file", sl.Err(err))
 			return
 		}
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 
 		if _, err = io.Copy(f, r.Body); err != nil {
 			http.Error(w, "Can't copy file", http.StatusInternalServerError)
@@ -439,7 +424,7 @@ func GetHomeworkSolveReviewsByIdReviews(logger *slog.Logger, storage *postgres.S
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(map[string]any{"reviews": solve}); err != nil {
+		if err := json.NewEncoder(w).Encode(map[string]any{"reviews": solve.TeacherResumes}); err != nil {
 			logger.Error("Can't marshall solve json", sl.Err(err))
 		}
 	}
