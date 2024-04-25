@@ -573,6 +573,7 @@ COPY public.homework_answer_files (id, created_at, updated_at, deleted_at, homew
 --
 
 COPY public.homework_answers (id, created_at, updated_at, deleted_at, text, homework_id, student_id) FROM stdin;
+1	2024-04-23 08:38:39.324334+00	2024-04-23 08:38:39.324334+00	\N	Ну тут бам бам бим бим в общем	1	2
 \.
 
 
@@ -581,6 +582,13 @@ COPY public.homework_answers (id, created_at, updated_at, deleted_at, text, home
 --
 
 COPY public.homework_files (id, created_at, updated_at, deleted_at, homework_id, filepath) FROM stdin;
+5	2024-04-22 16:13:19.485365+00	2024-04-22 16:13:19.485365+00	\N	1	files/teachers/5.md
+8	2024-04-22 16:23:16.557863+00	2024-04-22 16:23:16.557863+00	\N	1	files/teachers/8.docx
+6	2024-04-22 16:13:19.490053+00	2024-04-22 16:13:19.490053+00	\N	1	files/teachers/6.docx
+3	2024-04-22 16:11:43.45044+00	2024-04-22 16:11:43.45044+00	\N	1	files/teachers/3.yml
+7	2024-04-22 16:23:16.485131+00	2024-04-22 16:23:16.485131+00	\N	1	files/teachers/7.md
+4	2024-04-22 16:12:22.37008+00	2024-04-22 16:12:22.37008+00	\N	1	files/teachers/4.yml
+9	2024-04-22 16:30:22.227428+00	2024-04-22 16:30:22.228456+00	\N	1	files/teachers/9.mod
 \.
 
 
@@ -670,6 +678,8 @@ COPY public.teacher_resumes (id, created_at, updated_at, deleted_at, homework_an
 --
 
 COPY public.teacher_to_subjects (subject_id, teacher_id) FROM stdin;
+1	1
+1	2
 \.
 
 
@@ -694,21 +704,21 @@ SELECT pg_catalog.setval('public.groups_id_seq', 3, true);
 -- Name: homework_answer_files_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gorm
 --
 
-SELECT pg_catalog.setval('public.homework_answer_files_id_seq', 1, false);
+SELECT pg_catalog.setval('public.homework_answer_files_id_seq', 2, true);
 
 
 --
 -- Name: homework_answers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gorm
 --
 
-SELECT pg_catalog.setval('public.homework_answers_id_seq', 1, false);
+SELECT pg_catalog.setval('public.homework_answers_id_seq', 1, true);
 
 
 --
 -- Name: homework_files_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gorm
 --
 
-SELECT pg_catalog.setval('public.homework_files_id_seq', 1, false);
+SELECT pg_catalog.setval('public.homework_files_id_seq', 9, true);
 
 
 --
