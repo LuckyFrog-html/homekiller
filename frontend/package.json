@@ -24,8 +24,8 @@
     "vite": "^5.0.3"
   },
   "type": "module",
-  "dependencies": { 
-    "bits-ui": "^0.21.4",
+  "dependencies": {
+    "bits-ui": "^0.21.1",
     "clsx": "^2.1.0",
     "formsnap": "^0.5.1",
     "lazygit": "^1.0.4",
