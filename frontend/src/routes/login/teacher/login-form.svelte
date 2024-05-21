@@ -35,5 +35,8 @@
     </Form.Field>
     <div class="flex justify-between items-center">
         <Form.Button>Войти</Form.Button>
+        <p>
+            Ученик? <a href="/login" class="text-blue-600">Войти</a>
+        </p>
     </div>
 </form>
