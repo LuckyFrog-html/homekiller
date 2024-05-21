@@ -1,12 +1,13 @@
 <script lang="ts">
-    import * as Dialog from "$lib/components/ui/dialog";
     import { parseDateFromString } from "$lib/utils";
     import type { PageData } from "./$types";
+    import AddStudentDialog from "./AddStudentDialog.svelte";
 
     export let data: PageData;
-    const students = data.students;
-    const lessons = data.lessons;
-    const group = data.group;
+    $: students = data.students;
+    $: lessons = data.lessons;
+    $: group = data.group;
+    $: allStudents = data.allStudents;
 </script>
 
 <div class="flex flex-col items-center h-full w-full">
@@ -23,11 +24,6 @@
                     {student.Name}
                 </h4>
             {/each}
-            <button
-                class="rounded mt-10 border-slate-200 dark:border-slate-800 border bg-slate-100 dark:bg-slate-800 h-fit p-3"
-            >
-                Добавить нового
-            </button>
         </div>
 
         <div class="flex flex-col gap-3">
@@ -42,5 +38,11 @@
                 </a>
             {/each}
         </div>
+
+        <AddStudentDialog
+            groupStudents={students}
+            {allStudents}
+            data={data.form}
+        />
     </main>
 </div>

@@ -70,6 +70,7 @@ export type Solution = {
     TeacherResumes: null,
     Student: Student | null,
     Homework: Task | null,
+    Reviews: Review[] | null,
 }
 
 export type Teacher = {
@@ -81,3 +82,11 @@ export type Teacher = {
     Login: string,
 }
 
+export type Review = {
+    ID: number,
+    CreatedAt: string,
+    UpdatedAt: string,
+    DeletedAt: string | null,
+    Score: number,
+    Comment: string,
+}

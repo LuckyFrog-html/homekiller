@@ -1,4 +1,5 @@
 <script lang="ts">
+    import Solution from "../../../teacher/homework/[id]/solution.svelte";
     import type { PageData } from "./$types";
     import Form from "./form.svelte";
     export let data: PageData;
@@ -19,6 +20,9 @@
     const images = data.task.HomeworkFiles.filter((file) =>
         isImage(file.Filepath),
     );
+
+    $: solutions = data.solutions || [];
+    $: console.log(solutions);
 </script>
 
 <div class="flex h-full w-full">
@@ -58,6 +62,27 @@
         </main>
         <div class="max-w-80">
             <Form data={data.form} />
+        </div>
+        <div>
+            {#each solutions as solution}
+                <div class="p-2 rounded bg-slate-200 dark:bg-slate-700">
+                    <div
+                        class="dark:bg-slate-800 bg-slate-300 rounded-lg p-3 my-3"
+                    >
+                        Ответ: {solution.Text}
+                    </div>
+                    {#each solution.Reviews || [] as review}
+                        <div
+                            class="dark:bg-slate-800 bg-slate-300 rounded-lg p-3 my-3"
+                        >
+                            Оценка:
+                            <p>{review.Score}</p>
+                            Комментарий:
+                            <p>{review.Comment}</p>
+                        </div>
+                    {/each}
+                </div>
+            {/each}
         </div>
     </div>
 </div>

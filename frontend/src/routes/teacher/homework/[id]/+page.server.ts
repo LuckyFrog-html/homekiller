@@ -44,6 +44,13 @@ export const actions: Actions = {
             return fail(400, { form });
         }
 
+        const token = event.cookies.get('teacher_token');
+        const res = await api.post<any>(`/solves/${form.id}/reviews`, form.data, { token });
+
+        if (res.type === "networkerror" || res.type === "error") {
+            return redirect(303, '/login');
+        }
+
         return {
             form,
         };

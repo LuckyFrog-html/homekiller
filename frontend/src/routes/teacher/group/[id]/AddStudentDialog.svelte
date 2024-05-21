@@ -1,15 +1,26 @@
 <script lang="ts">
-    import * as Dialog from "@radix-ui/react-dialog";
+    import * as Dialog from "$lib/components/ui/dialog";
+    import { type Infer, type SuperValidated } from "sveltekit-superforms";
+    import type { FormSchema } from "./schema";
+    import { Button } from "$lib/components/ui/button";
+    import type { Student } from "$lib/types";
+    import AddStudentForm from "./AddStudentForm.svelte";
+
+    export let data: SuperValidated<Infer<FormSchema>>;
+    export let allStudents: Student[] = [];
+    export let groupStudents: Student[] = [];
 </script>
 
 <Dialog.Root>
     <Dialog.Trigger>
-        <button>Добавить студента</button>
+        <Button>Добавить ученика</Button>
     </Dialog.Trigger>
     <Dialog.Content>
         <Dialog.Header>
-            <Dialog.Title>Добавить студента в группу</Dialog.Title>
-            <Dialog.Description></Dialog.Description>
+            <Dialog.Title>Добавить ученика</Dialog.Title>
+            <Dialog.Description>
+                <AddStudentForm {data} {allStudents} {groupStudents} />
+            </Dialog.Description>
         </Dialog.Header>
     </Dialog.Content>
 </Dialog.Root>
