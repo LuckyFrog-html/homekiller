@@ -82,3 +82,31 @@ func (s *Storage) IsTeacherInGroup(groupId, teacherId uint) bool {
 
 	return result.Error == nil
 }
+
+func (s *Storage) DeleteGroup(groupId uint) error {
+	tx := s.Db.Begin()
+	defer tx.Commit()
+	var group models.Group
+
+	result := tx.First(&group, "id = ?", groupId)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	tx.Delete(&group)
+	return tx.Error
+}
+
+func (s *Storage) DeleteStudentFromGroup(groupId, studentId uint) error {
+	tx := s.Db.Begin()
+	defer tx.Commit()
+	var studentToGroup models.StudentsToGroups
+
+	result := tx.First(&studentToGroup, "group_id = ? AND student_id = ?", groupId, studentId)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	tx.Delete(&studentToGroup)
+	return tx.Error
+}

@@ -56,7 +56,7 @@ func (s *Storage) GetHomeworksByStudent(studentId uint) ([]StudentHomework, erro
 	tx := s.Db.Begin()
 	defer tx.Commit()
 	var studentsHomeworks []StudentHomework
-	result := tx.Raw("SELECT hw.*, ls.group_id, ha.id IS NOT NULL AS is_done, g2.title AS group_title, COALESCE(s.title, 'default') AS subject_title FROM homeworks hw JOIN lessons ls ON hw.lesson_id = ls.id JOIN students_to_groups sg on sg.group_id = ls.group_id LEFT OUTER JOIN homework_answers ha ON ha.homework_id = hw.id AND ha.student_id = sg.student_id JOIN groups g2 ON ls.group_id = g2.id JOIN teachers t ON t.id = g2.teacher_id LEFT OUTER JOIN teacher_to_subjects ts ON ts.teacher_id = t.id LEFT OUTER JOIN subjects s ON ts.subject_id = s.id WHERE sg.student_id = ? ORDER BY is_done, hw.deadline", studentId).Scan(&studentsHomeworks)
+	result := tx.Raw("SELECT hw.*, ls.group_id, ha.id IS NOT NULL AS is_done, g2.title AS group_title, COALESCE(s.title, 'default') AS subject_title FROM homeworks hw JOIN lessons ls ON hw.lesson_id = ls.id JOIN students_to_groups sg on sg.group_id = ls.group_id LEFT OUTER JOIN homework_answers ha ON ha.homework_id = hw.id AND ha.student_id = sg.student_id JOIN groups g2 ON ls.group_id = g2.id JOIN teachers t ON t.id = g2.teacher_id LEFT OUTER JOIN teacher_to_subjects ts ON ts.teacher_id = t.id LEFT OUTER JOIN subjects s ON ts.subject_id = s.id WHERE sg.student_id = ? AND hw.deleted_at IS NULL ORDER BY is_done, hw.deadline", studentId).Scan(&studentsHomeworks)
 	return studentsHomeworks, result.Error
 }
 
@@ -113,4 +113,28 @@ func (s *Storage) GetHomeworksByLessonId(lessonId uint) ([]models.Homework, erro
 	var homeworks []models.Homework
 	result := tx.Preload("HomeworkFiles").Find(&homeworks, "lesson_id = ?", lessonId)
 	return homeworks, result.Error
+}
+
+func (s *Storage) DeleteHomework(id uint) error {
+	tx := s.Db.Begin()
+	defer tx.Commit()
+	var homework models.Homework
+	result := tx.First(&homework, id)
+	if result.Error != nil {
+		return result.Error
+	}
+	tx.Delete(&homework)
+	return tx.Error
+}
+
+func (s *Storage) DeleteHomeworkSolve(id uint) error {
+	tx := s.Db.Begin()
+	defer tx.Commit()
+	var homeworkAnswer models.HomeworkAnswer
+	result := tx.First(&homeworkAnswer, id)
+	if result.Error != nil {
+		return result.Error
+	}
+	tx.Delete(&homeworkAnswer)
+	return tx.Error
 }

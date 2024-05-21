@@ -13,3 +13,7 @@ type HomeworkAnswerJson struct {
 	HomeworkId uint   `json:"homework_id"`
 	Text       string `json:"text"`
 }
+
+type DeleteHomeworkJson struct {
+	HomeworkId uint `json:"homework_id"`
+}

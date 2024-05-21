@@ -69,3 +69,15 @@ func (s *Storage) GetLessonsByTeacher(teacherId uint) ([]*models.Lesson, error) 
 		Where("groups.teacher_id = ?", teacherId).Find(&lessons)
 	return lessons, result.Error
 }
+
+func (s *Storage) DeleteLesson(lessonId uint) error {
+	tx := s.Db.Begin()
+	defer tx.Commit()
+	var lesson models.Lesson
+	result := tx.First(&lesson, lessonId)
+	if result.Error != nil {
+		return result.Error
+	}
+	tx.Delete(&lesson)
+	return tx.Error
+}

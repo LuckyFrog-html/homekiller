@@ -101,11 +101,13 @@ func CreateRouter(log *slog.Logger, storage *postgres.Storage) chi.Router {
 
 		r.Get("/groups/{group_id}/lessons", lessons.GetLessonsByGroup(log, storage))
 		r.Get("/teacher/groups/{group_id}", groups.GetGroupById(log, storage))
-		// TODO: DELETE для студента
-		// TODO: DELETE для группы
-		// TODO: DELETE для прикрепления студента к группе
-		// TODO: DELETE для урока
-		// TODO: DELETE для домашки
+
+		r.Delete("/students", students.DeleteStudentHandler(log, storage))
+		r.Delete("/groups", groups.DeleteGroup(log, storage))
+		r.Delete("/groups/students", groups.DeleteStudentFromGroup(log, storage))
+		r.Delete("/lessons", lessons.DeleteLesson(log, storage))
+		r.Delete("/homeworks", homeworks.DeleteHomework(log, storage))
+		r.Delete("/solves", homeworks.DeleteHomeworkSolve(log, storage))
 		// TODO: DELETE для файла из домашки
 	})
 	router.Group(func(r chi.Router) {

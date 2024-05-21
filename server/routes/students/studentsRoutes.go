@@ -73,3 +73,22 @@ func GetAllStudents(logger *slog.Logger, storage *postgres.Storage) http.Handler
 		}
 	}
 }
+
+func DeleteStudentHandler(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var studentData communicationJson.DeleteStudentJson
+		if err := json.NewDecoder(r.Body).Decode(&studentData); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			logger.Error("Can't unmarshal JSON", sl.Err(err))
+			return
+
+		}
+
+		if err := storage.DeleteStudent(studentData.StudentId); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}
+}

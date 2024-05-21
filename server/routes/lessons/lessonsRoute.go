@@ -237,3 +237,39 @@ func GetLessonsByGroup(logger *slog.Logger, storage *postgres.Storage) http.Hand
 		}
 	}
 }
+
+func DeleteLesson(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var lessonData communicationJson.DeleteLessonJson
+		if err := json.NewDecoder(r.Body).Decode(&lessonData); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			logger.Error("Can't unmarshal JSON", sl.Err(err))
+			return
+		}
+
+		teacherId, err := middlewares.GetTeacherIdFromContext(r.Context())
+		if err != nil {
+			http.Error(w, "Can't get teacherId", http.StatusNotFound)
+			logger.Error("Can't get teacherId", sl.Err(err))
+			return
+		}
+
+		lesson, err := storage.GetLessonById(lessonData.LessonID)
+		if err != nil {
+			http.Error(w, "Can't get lesson", http.StatusInternalServerError)
+			logger.Error("Can't get lesson", sl.Err(err))
+			return
+		}
+
+		if lesson.Group.TeacherID != teacherId {
+			http.Error(w, "Teacher is not owner of this group", http.StatusForbidden)
+			return
+		}
+
+		if err := storage.DeleteLesson(lessonData.LessonID); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	}
+}

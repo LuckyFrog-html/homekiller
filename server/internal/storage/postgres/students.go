@@ -86,3 +86,16 @@ func (s *Storage) MarkStudentAttendance(studentsIds []uint, lessonId uint) {
 	}
 	tx.Commit()
 }
+
+func (s *Storage) DeleteStudent(studentId uint) error {
+	tx := s.Db.Begin()
+	defer tx.Commit()
+	var student models.Student
+	tx.First(&student, "id = ?", studentId)
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	tx.Delete(&student)
+	return tx.Error
+}

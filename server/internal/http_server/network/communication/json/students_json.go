@@ -11,3 +11,7 @@ type GetStudentJson struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
 }
+
+type DeleteStudentJson struct {
+	StudentId uint `json:"student_id"`
+}
