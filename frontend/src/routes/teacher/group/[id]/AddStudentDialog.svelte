@@ -13,11 +13,11 @@
 
 <Dialog.Root>
     <Dialog.Trigger>
-        <Button>Добавить ученика</Button>
+        <Button>Добавить учеников</Button>
     </Dialog.Trigger>
     <Dialog.Content>
         <Dialog.Header>
-            <Dialog.Title>Добавить ученика</Dialog.Title>
+            <Dialog.Title>Добавить учеников</Dialog.Title>
             <Dialog.Description>
                 <AddStudentForm {data} {allStudents} {groupStudents} />
             </Dialog.Description>

@@ -11,8 +11,10 @@
 </script>
 
 <div class="flex flex-col items-center h-full w-full">
-    <a href="/teacher/groups" class="text-3xl">&lt;-</a>
-    <h2 class="text-3xl mt-3">{group.Title}</h2>
+    <div class="flex flex-row gap-10">
+        <a href="/teacher/groups" class="text-3xl">&lt;-</a>
+        <h2 class="text-3xl">{group.Title}</h2>
+    </div>
 
     <main class="grid grid-cols-2 w-full p-3 gap-3">
         <div class="flex flex-col gap-3">

@@ -2,7 +2,7 @@
     import type { PageData } from "./$types";
 
     export let data: PageData;
-    const groups = data.groups;
+    $: groups = data.groups;
 </script>
 
 <div class="flex h-full w-full">
