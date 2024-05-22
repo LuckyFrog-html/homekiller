@@ -35,7 +35,12 @@
     }
 </script>
 
-<form method="POST" use:enhance enctype="multipart/form-data">
+<form
+    method="POST"
+    action="?/addStudents"
+    use:enhance
+    enctype="multipart/form-data"
+>
     <Form.Fieldset {form} name="studentIds" class="space-y-3">
         <div class="flex flex-col gap-4">
             {#each leftStudents as student}

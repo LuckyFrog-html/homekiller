@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { PageData } from "./$types";
+    import AddGroupDialog from "./AddGroupDialog.svelte";
 
     export let data: PageData;
     $: groups = data.groups;
@@ -18,6 +19,7 @@
                     <h4 class="text-xl">{group.Title}</h4>
                 </a>
             {/each}
+            <AddGroupDialog data={data.form} />
         </div>
     </main>
 </div>

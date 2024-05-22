@@ -1,6 +1,8 @@
 <script lang="ts">
     import { parseDateFromString } from "$lib/utils";
     import type { PageData } from "./$types";
+    import AddLessonDialog from "./AddLessonDialog.svelte";
+    import AddLessonForm from "./AddLessonForm.svelte";
     import AddStudentDialog from "./AddStudentDialog.svelte";
 
     export let data: PageData;
@@ -44,7 +46,8 @@
         <AddStudentDialog
             groupStudents={students}
             {allStudents}
-            data={data.form}
+            data={data.studentsForm}
         />
+        <AddLessonDialog data={data.lessonForm} />
     </main>
 </div>

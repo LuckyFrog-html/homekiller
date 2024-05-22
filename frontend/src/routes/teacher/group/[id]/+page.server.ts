@@ -5,7 +5,7 @@ import type { Lesson, Student } from '$lib/types';
 import type { Group } from 'lucide-svelte';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import { formSchema } from './schema';
+import { formSchema, lessonFormSchema } from './schema';
 
 /** @type {PageServerLoad} */
 export async function load({ params, cookies }: Parameters<PageServerLoad>[0]) {
@@ -49,13 +49,14 @@ export async function load({ params, cookies }: Parameters<PageServerLoad>[0]) {
         lessons,
         group,
         allStudents,
-        form: await superValidate(zod(formSchema)),
+        studentsForm: await superValidate(zod(formSchema)),
+        lessonForm: await superValidate(zod(lessonFormSchema)),
     };
 }
 
 
 export const actions: Actions = {
-    default: async (event) => {
+    addStudents: async (event) => {
         const form = await superValidate(event, zod(formSchema));
         if (!form.valid) {
             return fail(400, { form });
@@ -76,7 +77,34 @@ export const actions: Actions = {
         }
 
         return {
-            form,
+            studentsForm: form,
+        }
+    },
+
+    addLesson: async (event) => {
+        const form = await superValidate(event, zod(lessonFormSchema));
+        if (!form.valid || !form.data.date) {
+            return fail(400, { form });
+        }
+
+        let dateD = form.data.date;
+        dateD.setTime(dateD.getTime() + (form.data.hour * 60 * 60 * 1000) + (form.data.minute * 60 * 1000));
+        const date = dateD.toISOString();
+        console.log(date);
+        const token = event.cookies.get('teacher_token');
+        const addStudetnsRed = await api.post(`/lessons`, { date }, { token });
+
+        console.log(addStudetnsRed);
+        if (addStudetnsRed.type === "error" && addStudetnsRed.status === 401) {
+            return redirect(303, '/login');
+        }
+
+        if (addStudetnsRed.type === "networkerror" || addStudetnsRed.type === "error") {
+            return redirect(303, '/login');
+        }
+
+        return {
+            lessonForm: form,
         }
     }
 }
