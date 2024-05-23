@@ -7,7 +7,7 @@
 
     const groupsHash: any = {};
 
-    for (const task of tasks) {
+    for (const task of tasks || []) {
         groupsHash[task.GroupId.toString()] = task.GroupTitle;
     }
 

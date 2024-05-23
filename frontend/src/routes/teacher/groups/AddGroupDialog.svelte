@@ -5,17 +5,17 @@
         type Infer,
         type SuperValidated,
     } from "sveltekit-superforms";
-    import { formSchema } from "./schema";
-    import type { FormSchema } from "./schema";
+    import { groupFormSchema } from "./schema";
+    import type { GroupFormSchema } from "./schema";
     import { zodClient } from "sveltekit-superforms/adapters";
     import { Textarea } from "$lib/components/ui/textarea";
     import * as Form from "$lib/components/ui/form";
     import { Button } from "$lib/components/ui/button";
 
-    export let data: SuperValidated<Infer<FormSchema>>;
+    export let data: SuperValidated<Infer<GroupFormSchema>>;
 
     const form = superForm(data, {
-        validators: zodClient(formSchema),
+        validators: zodClient(groupFormSchema),
     });
     const { form: formData, enhance, errors } = form;
 </script>
@@ -28,7 +28,12 @@
         <Dialog.Header>
             <Dialog.Title>Добавить группу</Dialog.Title>
             <Dialog.Description>
-                <form method="POST" use:enhance enctype="multipart/form-data">
+                <form
+                    method="POST"
+                    action="?/addGroup"
+                    use:enhance
+                    enctype="multipart/form-data"
+                >
                     <div class="flex flex-col">
                         <Form.Field {form} name="name">
                             <Form.Control let:attrs>
