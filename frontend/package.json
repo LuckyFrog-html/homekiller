@@ -25,7 +25,8 @@
   },
   "type": "module",
   "dependencies": {
-    "bits-ui": "^0.21.1",
+    "@internationalized/date": "^3.5.4",
+    "bits-ui": "^0.21.9",
     "clsx": "^2.1.0",
     "formsnap": "^0.5.1",
     "lazygit": "^1.0.4",

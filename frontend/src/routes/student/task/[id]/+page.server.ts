@@ -19,6 +19,7 @@ export async function load({ params, cookies }: Parameters<PageServerLoad>[0]) {
         return redirect(303, '/login');
     }
 
+
     const task = taskReq.data as Task;
 
     const solutionsReq = await api.get<any>(`/homeworks/${params.id}/solutions`, { token });
@@ -32,12 +33,15 @@ export async function load({ params, cookies }: Parameters<PageServerLoad>[0]) {
     for (const solution of solutions) {
         const reviewsReq = await api.get<any>(`/solutions/${solution.ID}/reviews`, { token });
 
+        if (reviewsReq.type === "error" && reviewsReq.status === 403 && reviewsReq.error == "Student is not owner of this solve\n") {
+            continue;
+        }
+
         if (reviewsReq.type === "networkerror" || reviewsReq.type === "error") {
             return redirect(303, '/login');
         }
 
         const reviews = reviewsReq.data.reviews as Review[];
-        console.log("reww", reviews);
         solution.Reviews = reviews;
     }
 

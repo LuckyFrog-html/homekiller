@@ -45,5 +45,3 @@ export const actions: Actions = {
         return redirect(302, '/student/tasks');
     },
 };
-
-

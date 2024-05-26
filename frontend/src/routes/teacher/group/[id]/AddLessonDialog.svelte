@@ -3,23 +3,20 @@
     import { type Infer, type SuperValidated } from "sveltekit-superforms";
     import type { FormSchema } from "./schema";
     import { Button } from "$lib/components/ui/button";
-    import type { Student } from "$lib/types";
-    import AddStudentForm from "./AddStudentForm.svelte";
+    import AddLessonForm from "./AddLessonForm.svelte";
 
     export let data: SuperValidated<Infer<FormSchema>>;
-    export let allStudents: Student[] = [];
-    export let groupStudents: Student[] = [];
 </script>
 
 <Dialog.Root>
     <Dialog.Trigger>
-        <Button>Добавить учеников</Button>
+        <Button>Добавить занятие</Button>
     </Dialog.Trigger>
     <Dialog.Content>
         <Dialog.Header>
-            <Dialog.Title>Добавить учеников</Dialog.Title>
+            <Dialog.Title>Добавить занятие</Dialog.Title>
             <Dialog.Description>
-                <AddStudentForm {data} {allStudents} {groupStudents} />
+                <AddLessonForm {data} />
             </Dialog.Description>
         </Dialog.Header>
     </Dialog.Content>

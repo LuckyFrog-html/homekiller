@@ -22,14 +22,13 @@
     );
 
     $: solutions = data.solutions || [];
-    $: console.log(solutions);
 </script>
 
 <div class="flex h-full w-full">
-    <div class="flex w-full flex-col gap-2 p-6">
-        <div>
-            <a href="/student/tasks" class="text-3xl">&lt;-</a>
-            <span class="text-3xl">{data.task.ID}</span>
+    <div class="flex w-full flex-col gap-2">
+        <div class="flex gap-6 justify-center text-3xl">
+            <a href="/student/tasks">&lt;-</a>
+            <span> Домашнее задание номер {data.task.ID}</span>
         </div>
         <main class="flex lg:flex-row flex-col gap-3">
             <div class="flex flex-col w-full grow justify-between">

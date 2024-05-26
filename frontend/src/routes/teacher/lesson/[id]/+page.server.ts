@@ -65,7 +65,6 @@ export const actions: Actions = {
             max_score: 10,
         }, { token });
 
-        console.log(res);
 
         if (res.type === 'error' && res.status === 401) {
             return redirect(303, '/login');

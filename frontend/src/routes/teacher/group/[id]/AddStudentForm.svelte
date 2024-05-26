@@ -23,34 +23,38 @@
         validators: zodClient(formSchema),
     });
     const { form: formData, enhance, errors } = form;
-    $: console.log($errors);
+
+    function onCheck(v: boolean | "indeterminate", student: Student) {
+        if (v === true) {
+            $formData.studentIds = [...$formData.studentIds, student.ID];
+        } else {
+            $formData.studentIds = $formData.studentIds.filter(
+                (id) => id !== student.ID,
+            );
+        }
+    }
 </script>
 
-<form method="POST" use:enhance enctype="multipart/form-data">
-    <Form.Fieldset {form} name="studentIds" class="space-y-0">
-        <div class="space-y-2">
+<form
+    method="POST"
+    action="?/addStudents"
+    use:enhance
+    enctype="multipart/form-data"
+>
+    <Form.Fieldset {form} name="studentIds" class="space-y-3">
+        <div class="flex flex-col gap-4">
             {#each leftStudents as student}
                 {@const checked = $formData.studentIds.includes(student.ID)}
-                <div class="flex flex-row items-start space-x-3">
+                <div class="flex flex-row space-x-3 items-center">
                     <Form.Control let:attrs>
                         <Checkbox
                             {...attrs}
                             {checked}
                             onCheckedChange={(v) => {
-                                if (v) {
-                                    $formData.studentIds = [
-                                        ...$formData.studentIds,
-                                        student.ID,
-                                    ];
-                                } else {
-                                    $formData.studentIds =
-                                        $formData.studentIds.filter(
-                                            (id) => id !== student.ID,
-                                        );
-                                }
+                                onCheck(v, student);
                             }}
                         />
-                        <Form.Label class="font-normal">
+                        <Form.Label class="text-base">
                             {student.Name}
                         </Form.Label>
                         <input
