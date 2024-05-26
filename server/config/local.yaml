@@ -5,8 +5,8 @@ http_server:
   idle_timeout: "60s"
 database:
   host: "localhost"
-  user: "postgres"
-  password: "1234"
-  dbname: "homekiller"
-  port: 5432
+  user: "gorm"
+  password: "gorm"
+  dbname: "main"
+  port: 8000
 storage_path: "files"

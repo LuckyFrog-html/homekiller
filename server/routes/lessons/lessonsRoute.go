@@ -11,6 +11,7 @@ import (
 	"server/internal/lib/logger/sl"
 	"server/internal/storage/postgres"
 	"server/models"
+	"time"
 )
 
 func AddLesson(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc {
@@ -19,6 +20,13 @@ func AddLesson(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc 
 		if err := json.NewDecoder(r.Body).Decode(&lessonData); err != nil {
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 			logger.Error("Can't unmarshal JSON", sl.Err(err))
+			return
+		}
+
+		date, err := time.Parse(time.DateTime, lessonData.Date)
+		fmt.Println(lessonData.Date)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Can't parse date from %s. Not valid", lessonData.Date), http.StatusBadRequest)
 			return
 		}
 
@@ -35,7 +43,7 @@ func AddLesson(logger *slog.Logger, storage *postgres.Storage) http.HandlerFunc 
 			return
 		}
 
-		lesson, err := storage.AddLesson(lessonData.Date, lessonData.GroupId)
+		lesson, err := storage.AddLesson(date, lessonData.GroupId)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

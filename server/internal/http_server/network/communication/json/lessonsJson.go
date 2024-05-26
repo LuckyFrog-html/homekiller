@@ -1,10 +1,8 @@
 package json
 
-import "time"
-
 type AddLessonJson struct {
-	Date    time.Time `json:"date"`
-	GroupId uint      `json:"group_id"`
+	Date    string `json:"date"`
+	GroupId uint   `json:"group_id"`
 }
 
 type MarkStudentAttendanceJson struct {
