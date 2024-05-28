@@ -9,9 +9,9 @@
 </script>
 
 <div class="flex h-full w-full">
-    <div class="flex w-full flex-col gap-2">
+    <div class="flex w-full flex-col gap-2 p-10">
         <div class="flex justify-center flex-row gap-6 text-3xl">
-            <a href="/teacher/lesson/{task.LessonID}">&lt;-</a>
+            <a class="rounded border border-current border-solid px-2 py-1" href="/teacher/lesson/{task.LessonID}">&lt;- Назад</a>
             <span>Домашнее задание номер {data.task.ID}</span>
         </div>
         <main class="flex lg:flex-row flex-col gap-3 mb-3">

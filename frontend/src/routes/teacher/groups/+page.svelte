@@ -11,7 +11,7 @@
 <div class="flex h-full w-full">
     <main class="flex w-full flex-col lg:flex-row p-3 gap-3">
         <div class="w-full">
-            <h1 class="text-3xl">Ваши группы:</h1>
+            <h1 class="text-3xl mb-3">Ваши группы:</h1>
             <div class="flex flex-col gap-3 max-h-screen">
                 {#each groups as group}
                     <a
@@ -25,7 +25,7 @@
             </div>
         </div>
         <div class="w-full">
-            <h1 class="text-3xl">Все студенты:</h1>
+            <h1 class="text-3xl mb-3">Все студенты:</h1>
             <div class="flex flex-col gap-3 max-h-screen">
                 {#each students as student}
                     <div
