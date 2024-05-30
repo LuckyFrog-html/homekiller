@@ -24,10 +24,10 @@
     $: solutions = data.solutions || [];
 </script>
 
-<div class="flex h-full w-full">
+<div class="flex h-full w-full p-5">
     <div class="flex w-full flex-col gap-2">
         <div class="flex gap-6 justify-center text-3xl">
-            <a href="/student/tasks">&lt;-</a>
+            <a class="rounded border border-current border-solid px-2 py-1" href="/student/tasks">&lt;- Назад</a>
             <span> Домашнее задание номер {data.task.ID}</span>
         </div>
         <main class="flex lg:flex-row flex-col gap-3">

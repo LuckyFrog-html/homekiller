@@ -13,8 +13,8 @@
 </script>
 
 <div class="flex flex-col items-center h-full w-full">
-    <div class="flex flex-row gap-10">
-        <a href="/teacher/groups" class="text-3xl">&lt;-</a>
+    <div class="flex flex-row gap-10 mt-3">
+        <a class="rounded border border-current border-solid px-2 py-1 text-3xl" href="/teacher/groups">&lt;- Назад</a>
         <h2 class="text-3xl">{group.Title}</h2>
     </div>
 

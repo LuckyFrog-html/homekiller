@@ -10,9 +10,9 @@
     const lesson = data.lesson;
 </script>
 
-<div class="flex flex-col items-center h-full w-full">
+<div class="flex mt-5 flex-col items-center h-full w-full">
     <div class="flex gap-10 relative text-3xl">
-        <a href="/teacher/group/{lesson.GroupID}">&lt;-</a>
+        <a class="rounded border border-current border-solid px-2 py-1" href="/teacher/group/{lesson.GroupID}">&lt;- Назад</a>
         <h2>
             Урок {lesson.ID} у группы {lesson.Group?.Title}
         </h2>
